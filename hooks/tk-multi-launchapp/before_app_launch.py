@@ -79,6 +79,8 @@ class BeforeAppLaunch(tank.Hook):
 
         self.logger.info("* Config Hook : Launch : %s %s *" % (software_entity["code"], version))
 
+        # Add test line.
+
         # Get the application launcher.
         multi_launchapp = self.parent
         # Get the current project.
