@@ -57,6 +57,10 @@ keys:
         type: int
     segment_name:
         type: str
+    pass:
+        type: str
+    aov:
+        type: str
 
     # Represents the optional output name for frames written by the Shotgun Write Node
     nuke.output:
