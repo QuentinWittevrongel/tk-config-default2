@@ -190,7 +190,7 @@ paths:
     asset_work_root:
         definition: "@asset_root/work/{Step}"
     shot_publish_root:
-        definition: "@shoot_root/publish/{Step}"
+        definition: "@shot_root/publish/{Step}"
     shot_work_root:
         definition: "@shot_root/work/{Step}"
 
