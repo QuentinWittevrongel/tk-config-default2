@@ -181,9 +181,86 @@ paths:
     #
     # These don't require the standard formatting (with definition and root_name) because they
     # will be set within each template that uses the alias.
-    shot_root: sequences/{Sequence}/{Shot}/{Step}
-    asset_root: assets/{sg_asset_type}/{Asset}/{Step}
+    shot_root: sequences/{Sequence}/{Shot}
+    asset_root: assets/{sg_asset_type}/{Asset}
     sequence_root: sequences/{Sequence}
+
+    asset_publish_root: "@asset_root/publish/{Step}"
+    asset_work_root: "@asset_root/work/{Step}"
+    shot_publish_root: "@shoot_root/publish/{Step}"
+    shot_work_root: "@shot_root/work/{Step}"
+
+    #
+    # ALEMBIC PATHS
+    #
+    asset_alembic_cache:
+        definition: '@asset_root/publish/caches/{name}.v{version}.abc'
+
+    asset_alembic_publish:
+        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.abc"
+
+    shot_alembic_publish:
+        definition: "@shot_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.abc"
+
+    #
+    # MATERIAL X PATHS
+    #
+    asset_materialX_publish:
+        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.mtlx"
+
+    #
+    # EXR RENDER PATHS
+    #
+    asset_exrTurnTableAOVs_publish:
+        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{aov}/{Step}_{Asset}_{pass}_{aov}.v{version}.exr"
+
+    asset_exrTurnTable_publish:
+        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{Step}_{Asset}_{pass}.v{version}.exr"
+
+    shot_exrRenderAOVs_publish:
+        definition: "@shot_publish_root/v{version}/{pass}/{aov}/{Step}_{Shot}_{pass}_{aov}.v{version}.exr"
+
+    shot_exrRender_publish:
+        definition: "@shot_publish_root/v{version}/{pass}/{Step}_{Shot}_{pass}.v{version}.exr"
+
+    #
+    # MAYA PATHS
+    #
+
+    # define the location of a work area
+    shot_work_area_maya:
+        definition: '@shot_work_root/maya'
+    # define the location of a publish area
+    shot_publish_area_maya:
+        definition: '@shot_publish_root/maya'
+    # The location of WIP files
+    maya_shot_work:
+        definition: '@shot_work_root/maya/scenes/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+    # The location of backups of WIP files
+    maya_shot_snapshot:
+        definition: '@shot_work_root/work/maya/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
+    # The location of published maya files
+    maya_shot_publish:
+        definition: '@shot_publish_root/maya/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+    # define the location of a work area
+    asset_work_area_maya:
+        definition: '@asset_work_root/maya'
+    # define the location of a publish area
+    asset_publish_area_maya:
+        definition: '@asset_publish_root/maya'
+    # The location of WIP files
+    maya_asset_work:
+        definition: '@asset_work_root/maya/{name}.v{version}.{maya_extension}'
+    # The location of backups of WIP files
+    maya_asset_snapshot:
+        definition: '@asset_work__root/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
+    # The location of published maya files
+    maya_asset_publish:
+        definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
+
+    #
+    # HOUDINI PATHS
+    #
 
 
     ##########################################################################################
@@ -290,21 +367,6 @@ paths:
     # Maya
     #
 
-    # define the location of a work area
-    shot_work_area_maya:
-        definition: '@shot_root/work/maya'
-    # define the location of a publish area
-    shot_publish_area_maya:
-        definition: '@shot_root/publish/maya'
-    # The location of WIP files
-    maya_shot_work:
-        definition: '@shot_root/work/maya/{name}.v{version}.{maya_extension}'
-    # The location of backups of WIP files
-    maya_shot_snapshot:
-        definition: '@shot_root/work/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
-    # The location of published maya files
-    maya_shot_publish:
-        definition: '@shot_root/publish/maya/{name}.v{version}.{maya_extension}'
 
 
     #
@@ -313,22 +375,22 @@ paths:
 
     # define the location of a work area
     shot_work_area_houdini:
-        definition: '@shot_root/work/houdini'
+        definition: '@shot_work_root/houdini'
     # define the location of a publish area
     shot_publish_area_houdini:
-        definition: '@shot_root/publish/houdini'
+        definition: '@shot_publish_root/houdini'
     # The location of WIP files
     houdini_shot_work:
-        definition: '@shot_root/work/houdini/{name}.v{version}.hip'
+        definition: '@shot_work_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
     # The location of backups of WIP files
     houdini_shot_snapshot:
-        definition: '@shot_root/work/houdini/snapshots/{name}.v{version}.{timestamp}.hip'
+        definition: '@shot_work_root/houdini/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.hip'
     # The location of published houdini files
     houdini_shot_publish:
-        definition: '@shot_root/publish/houdini/{name}.v{version}.hip'
+        definition: '@shot_publish_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
     # Alembic caches
     houdini_shot_work_alembic_cache:
-        definition: '@shot_root/work/houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Shot}_{name}_v{version}.abc'
+        definition: '@shot_work_root/houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Step}_{Shot}_{name}_v{version}.abc'
 
     # Rendered images
     houdini_shot_render:
@@ -439,8 +501,7 @@ paths:
     # Alembic caches
     #
 
-    asset_alembic_cache:
-        definition: '@asset_root/publish/caches/{name}.v{version}.abc'
+
 
 
     #
@@ -501,21 +562,6 @@ paths:
     # Maya
     #
 
-    # define the location of a work area
-    asset_work_area_maya:
-        definition: '@asset_root/work/maya'
-    # define the location of a publish area
-    asset_publish_area_maya:
-        definition: '@asset_root/publish/maya'
-    # The location of WIP files
-    maya_asset_work:
-        definition: '@asset_root/work/maya/{name}.v{version}.{maya_extension}'
-    # The location of backups of WIP files
-    maya_asset_snapshot:
-        definition: '@asset_root/work/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
-    # The location of published maya files
-    maya_asset_publish:
-        definition: '@asset_root/publish/maya/{name}.v{version}.{maya_extension}'
 
 
     #
