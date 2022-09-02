@@ -257,7 +257,7 @@ paths:
         definition: '@asset_work_root/maya/{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_asset_snapshot:
-        definition: '@asset_work__root/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
+        definition: '@asset_work_root/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_asset_publish:
         definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
