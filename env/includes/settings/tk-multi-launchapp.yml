@@ -16,6 +16,12 @@ includes:
 
 ################################################################################
 
+# Add local config hook DCCs for launch
+settings.tk-multi-launchapp:
+  use_software_entity: true
+  hook_before_app_launch: "{config}/tk-multi-launchapp/before_app_launch.py"
+  location: "@apps.tk-multi-launchapp.location"
+
 # auto discover DCCs for launch
 settings.tk-multi-launchapp:
   use_software_entity: true
