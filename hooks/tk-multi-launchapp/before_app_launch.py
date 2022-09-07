@@ -120,7 +120,22 @@ class BeforeAppLaunch(tank.Hook):
             if(version == "19.0.383"):
                 pass
             elif(version == "19.5.303"):
-                pass
+                # Add the farm tools.
+                self.addToEnvironmentEnd('HOUDINI_OTLSCAN_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0\\farmTools\\dccs\\houdini\\hda')                
+                self.addToEnvironmentEnd('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0')
+                self.addToEnvironmentBegin('HOUDINI_MENU_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0\\farmTools\\dccs\\houdini\\menus')
+        
+                # Add P3D HDA.
+                self.addToEnvironmentEnd('HOUDINI_OTLSCAN_PATH', 'Z:\\P3DTools\\productionPackages\\houdini\\otls')
+                self.addToEnvironmentEnd('HOUDINI_VEX_PATH', 'Z:\\P3DTools\\productionPackages\\houdini\\vex')
+
+                # Add P3D Hair Tools.
+                self.addToEnvironmentEnd('HOUDINI_OTLSCAN_PATH', 'Z:\\P3DTools\\productionPackages\\houdiniHairTools\\hda')
+                self.addToEnvironmentEnd('HOUDINI_VEX_PATH', 'Z:\\P3DTools\\productionPackages\\houdiniHairTools\\vex')
+
+                # Add Arnold render.
+                self.addToEnvironmentEnd('PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\scripts\\bin')
+                self.addToEnvironmentBegin('HOUDINI_PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303')
         
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')

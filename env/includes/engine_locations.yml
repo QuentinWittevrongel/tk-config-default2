@@ -45,7 +45,7 @@ engines.tk-flame.location:
 engines.tk-houdini.location:
   type: app_store
   name: tk-houdini
-  version: v1.8.4
+  version: vP3D
 engines.tk-mari.location:
   type: app_store
   name: tk-mari
@@ -78,3 +78,7 @@ engines.tk-vred.location:
   type: app_store
   name: tk-vred
   version: v2.1.4
+engines.tk-substancepainter.location:
+  type: git
+  path: https://github.com/diegogarciahuerta/tk-substancepainter
+  version: v1.2.2
