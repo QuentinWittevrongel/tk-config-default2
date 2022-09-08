@@ -51,6 +51,7 @@ engines.tk-houdini.location:
   name: tk-houdini
   path: https://github.com/BaratteG/P3D_tk-houdini.git
   branch: master
+  version: 40979f1
 engines.tk-mari.location:
   type: app_store
   name: tk-mari
@@ -64,6 +65,7 @@ engines.tk-maya.location:
   name: tk-maya
   path: https://github.com/BaratteG/P3D_tk-maya.git
   branch: master
+  version: 0a98913
 engines.tk-motionbuilder.location:
   type: app_store
   name: tk-motionbuilder
