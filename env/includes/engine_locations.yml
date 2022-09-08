@@ -49,7 +49,7 @@ engines.tk-flame.location:
 engines.tk-houdini.location:
   type: git_branch
   name: tk-houdini
-  path: https://github.com/BaratteG/P3D_tk-houdini.git
+  path: https://github.com/BaratteG/tk-houdini.git
   branch: master
   version: 40979f1
 engines.tk-mari.location:
@@ -63,7 +63,7 @@ engines.tk-mari.location:
 engines.tk-maya.location:
   type: git_branch
   name: tk-maya
-  path: https://github.com/BaratteG/P3D_tk-maya.git
+  path: https://github.com/BaratteG/tk-maya.git
   branch: master
   version: 0a98913
 engines.tk-motionbuilder.location:
