@@ -134,8 +134,8 @@ class BeforeAppLaunch(tank.Hook):
                 self.addToEnvironmentEnd('HOUDINI_VEX_PATH', 'Z:\\P3DTools\\productionPackages\\houdiniHairTools\\vex')
 
                 # Add Arnold render.
-                self.addToEnvironmentEnd('PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\scripts\\bin')
-                self.addToEnvironmentBegin('HOUDINI_PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303\\htoa-6.1.3.1_r90d42a5_houdini-19.5.303')
+                self.addToEnvironmentEnd('PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.2_r2bc6797_houdini-19.5.303\\scripts\\bin')
+                self.addToEnvironmentBegin('HOUDINI_PATH', 'C:\\Program Files\\Autodesk\\Arnold\\htoa-6.1.3.2_r2bc6797_houdini-19.5.303')
         
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')

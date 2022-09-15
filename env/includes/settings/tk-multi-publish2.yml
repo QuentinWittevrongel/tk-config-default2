@@ -182,6 +182,9 @@ settings.tk-multi-publish2.maya.asset_step:
   - name: Begin file versioning
     hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
     settings: {}
+  - name: Maya Plublish Base
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/mayaPublishBase.py"
+    settings: {}
   - name: Publish to ShotGrid
     hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
     settings:
@@ -190,6 +193,14 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session_geometry.py"
     settings:
         Publish Template: asset_alembic_cache
+  - name: Publish Asset Alembic MI
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_asset_alembic_mi.py"
+    settings:
+        Asset Alembic MI Publish Template: asset_alembic_publish
+  - name: Publish to ShotGrid
+    hook: "{engine}/tk-multi-publish2/basic/mayaPublishBase.py:{engine}/tk-multi-publish2/basic/publish_asset_scene.py"
+    settings:
+        Publish Template: maya_asset_publish
   help_url: *help_url
   location: "@apps.tk-multi-publish2.location"
 
