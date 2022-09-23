@@ -272,18 +272,11 @@ class MayaActions(HookBaseClass):
         if not os.path.exists(path):
             raise Exception("File not found on disk - '%s'" % path)
 
-        loadTools.importAssetAsReference(sg_publish_data.get("entity").get("name"), path)
+        loadTools.importAssetAsReference(sg_publish_data.get("entity").get("name"), path, sg_publish_data)
 
     def _importWithoutNamespace(self, path, sg_publish_data):
 
-        if not os.path.exists(path):
-            raise Exception("File not found on disk - '%s'" % path)
-
-        cmds.file(
-            path,
-            i=True,
-            type="mayaAscii"
-        )
+        loadTools.importAsset(sg_publish_data.get("entity").get("name"), path, sg_publish_data)
 
     def _create_reference(self, path, sg_publish_data):
         """

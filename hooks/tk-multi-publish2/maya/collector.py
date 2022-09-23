@@ -82,15 +82,25 @@ class MayaSessionCollector(HookBaseClass):
 
         print(ctxtProject)
         print(currentContext)
+        print(ctxtEntity)
 
-        # Set the P3D publish pipeline.
-        if(ctxtStep["name"] == "Model" or
-            ctxtStep["name"] == "UV"):
-            # Collect the data for a Model Publish.
-            self.collect_for_model_publish(settings, parent_item)
+        if(ctxtEntity["type"] == "Asset"):
+            # Set the P3D publish pipeline.
+            if(ctxtStep["name"] == "Model" or
+                ctxtStep["name"] == "UV"):
+                # Collect the data for a Model Publish.
+                self.collect_for_model_publish(settings, parent_item)
 
-        elif(ctxtStep["name"] == "Rig"):
-            self.collect_for_rig_publish(settings, parent_item)
+            elif(ctxtStep["name"] == "Rig"):
+                self.collect_for_rig_publish(settings, parent_item)
+
+            elif(ctxtStep["name"] == "Shading"):
+                self.collect_for_shd_publish(settings, parent_item)
+
+        elif(ctxtEntity["type"] == "Shot"):
+            if(ctxtStep["name"] == "Animation"):
+                self.collect_for_shot_animation_publish(settings, parent_item)
+
 
         else:
 
@@ -135,6 +145,58 @@ class MayaSessionCollector(HookBaseClass):
 
             #self.collect_selected_asset(item)
 
+    def collect_for_shot_animation_publish(self, settings, parent_item):
+        ''' Create the items to publish animation alembic.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        publisher = self.parent
+
+        # Get the current maya selection.
+        mSelection = cmds.ls(sl=True, type="transform")
+
+        # Check if the current selection is not empty.
+        if(len(mSelection) > 0):
+
+            # Create an item for each selected asset.
+            for sel in mSelection:
+                asset = P3Dfw.MayaAsset(assetRoot=sel)
+
+                item        = parent_item.create_item("maya.shot.assetInstance.alembic", "Shot Asset Instance Alembic", asset.fullname)
+                abcIcon     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+                item.set_icon_from_path(abcIcon)
+
+                # Add the asset project root to the item properties.
+                project_root = cmds.workspace(q=True, rootDirectory=True)
+                item.properties["project_root"] = project_root
+
+                # Create the asset object an add it to the item properties.
+                # That allow to share the MayaAsset Class with the publish plugin.
+                item.properties["assetObject"]      = asset
+                item.properties["assetName"]        = asset.sgEntityName
+                item.properties["assetInstance"]    = asset.instance
+
+                # if a work template is defined, add it to the item properties so
+                # that it can be used by attached publish plugins
+                work_template_setting = settings.get("Work Template")
+                if work_template_setting:
+
+                    work_template = publisher.engine.get_template_by_name(
+                        work_template_setting.value
+                    )
+
+                    # store the template on the item for use by publish plugins. we
+                    # can't evaluate the fields here because there's no guarantee the
+                    # current session path won't change once the item has been created.
+                    # the attached publish plugins will need to resolve the fields at
+                    # execution time.
+                    item.properties["work_template"] = work_template
+                    self.logger.debug("Work template defined for Maya collection.")
+
+
+
     def collect_for_model_publish(self, settings, parent_item):
         """
         Create the items for the model pipeline step publish.
@@ -144,6 +206,41 @@ class MayaSessionCollector(HookBaseClass):
         """
 
         self.collect_selected_assets(settings, parent_item)
+
+    def collect_for_shd_publish(self, settings, parent_item):
+        ''' Create an item represents the current selected asset shd.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Get the current maya selection.
+        mSelection = cmds.ls(sl=True, type="transform")
+
+        # Check if the current selection is not empty.
+        if(len(mSelection) > 0):
+
+            # Create an item for each selected asset.
+            for asset in mSelection:
+                
+                # Create the main rig item.
+                mainItem = self.collect_mayaAsset(
+                    settings,
+                    parent_item,
+                    asset,
+                    "Asset Shading Master",
+                    "maya.asset"
+                )
+                # Create the child rig item.
+                mtlxIcon = os.path.join(self.disk_location, os.pardir, "icons", "materialX.png")
+
+                shdLoItem = mainItem.create_item("maya.asset.materialXLO", "Asset MaterialX LO", asset)
+                shdLoItem.set_icon_from_path(mtlxIcon)
+                shdMiItem = mainItem.create_item("maya.asset.materialXMI", "Asset MaterialX MI", asset)
+                shdMiItem.set_icon_from_path(mtlxIcon)
+                shdHiItem = mainItem.create_item("maya.asset.materialXHI", "Asset MaterialX HI", asset)
+                shdHiItem.set_icon_from_path(mtlxIcon) 
+
 
     def collect_for_rig_publish(self, settings, parent_item):
         ''' Create an item represents the current selected asset rig.
@@ -170,9 +267,14 @@ class MayaSessionCollector(HookBaseClass):
                     "maya.asset.rigMaster"
                 )
                 # Create the child rig item.
+                mayaIcon = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+
                 rigLoItem = mainItem.create_item("maya.asset.rigLO", "Asset Rig LO", asset)
+                rigLoItem.set_icon_from_path(mayaIcon)
                 rigMiItem = mainItem.create_item("maya.asset.rigMI", "Asset Rig MI", asset)
+                rigMiItem.set_icon_from_path(mayaIcon)
                 rigHiItem = mainItem.create_item("maya.asset.rigHI", "Asset Rig HI", asset)
+                rigHiItem.set_icon_from_path(mayaIcon)
 
     def collect_mayaAsset(self, settings, parent_item, assetRoot, itemName, itemType):
         """ Collect an asset.

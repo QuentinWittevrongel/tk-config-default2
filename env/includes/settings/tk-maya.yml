@@ -22,6 +22,7 @@ includes:
 - ./tk-multi-snapshot.yml
 - ./tk-multi-workfiles2.yml
 - ./tk-multi-breakdown2.yml
+- ./tk-multi-publish2/tk-multi-publish2_maya.yml
 
 ################################################################################
 
