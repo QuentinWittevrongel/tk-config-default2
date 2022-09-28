@@ -20,7 +20,6 @@
 # this file. For more information, see the Shotgun Pipeline Toolkit Documentation.
 
 
-
 #
 # The keys section contains the definitions for all the different keys that are being
 # used by Sgtk. A key is a magic token that is replaced by a value at runtime, for example
@@ -65,6 +64,12 @@ keys:
         type: str
         alias: extension
     texture_name:
+        type: str
+    lod:
+        type: str
+    variant:
+        type: str
+    instance:
         type: str
 
     # Represents the optional output name for frames written by the Shotgun Write Node
@@ -182,63 +187,35 @@ keys:
 # different files should go.
 #
 
-paths:
+#
+# MAYA PATHS
+#
+maya_path: &maya_path
+    
+    # ASSET TEMPLATES
 
-    # Common  path definitions to use as shorthand in order to avoid repetitive and verbose
-    # templates. This also makes it easy to change any of the common root paths and have the
-    # changes apply to all templates that use them.
-    #
-    # These don't require the standard formatting (with definition and root_name) because they
-    # will be set within each template that uses the alias.
-    shot_root: sequences/{Sequence}/{Shot}
-    asset_root: assets/{sg_asset_type}/{Asset}
-    sequence_root: sequences/{Sequence}
+    # define the location of a work area
+    asset_work_area_maya:
+        definition: '@asset_work_root/maya'
+    # define the location of a publish area
+    asset_publish_area_maya:
+        definition: '@asset_publish_root/maya'
+    # The location of WIP files
+    maya_asset_work:
+        definition: '@asset_work_root/maya/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
+    # The location of backups of WIP files
+    maya_asset_snapshot:
+        definition: '@asset_work_root/maya/snapshots/{Step}_{Asset}_{name}.v{version}.{timestamp}.{maya_extension}'
+    # The location of the asset previews file.
+    maya_asset_previews:
+        definition: '@asset_work_root/maya/previews/{Step}_{Asset}.v{version}.mp4'
+    # The location of published maya files
+    maya_asset_publish:
+        definition: '@asset_publish_root/v{version}/{Step}_{Asset}.v{version}.{maya_extension}'
+    maya_asset_rig_publish:
+        definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{lod}.v{version}.{maya_extension}'
 
-    asset_publish_root: 
-        definition: "@asset_root/publish/{Step}"
-    asset_work_root:
-        definition: "@asset_root/work/{Step}"
-    shot_publish_root:
-        definition: "@shot_root/publish/{Step}"
-    shot_work_root:
-        definition: "@shot_root/work/{Step}"
-
-    #
-    # ALEMBIC PATHS
-    #
-    asset_alembic_cache:
-        definition: '@asset_root/publish/caches/{name}.v{version}.abc'
-
-    asset_alembic_publish:
-        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.abc"
-
-    shot_alembic_publish:
-        definition: "@shot_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.abc"
-
-    #
-    # MATERIAL X PATHS
-    #
-    asset_materialX_publish:
-        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.mtlx"
-
-    #
-    # EXR RENDER PATHS
-    #
-    asset_exrTurnTableAOVs_publish:
-        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{aov}/{Step}_{Asset}_{pass}_{aov}.v{version}.exr"
-
-    asset_exrTurnTable_publish:
-        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{Step}_{Asset}_{pass}.v{version}.exr"
-
-    shot_exrRenderAOVs_publish:
-        definition: "@shot_publish_root/v{version}/{pass}/{aov}/{Step}_{Shot}_{pass}_{aov}.v{version}.exr"
-
-    shot_exrRender_publish:
-        definition: "@shot_publish_root/v{version}/{pass}/{Step}_{Shot}_{pass}.v{version}.exr"
-
-    #
-    # MAYA PATHS
-    #
+    # SHOT TEMPLATES
 
     # define the location of a work area
     shot_work_area_maya:
@@ -254,33 +231,64 @@ paths:
         definition: '@shot_work_root/work/maya/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_shot_publish:
-        definition: '@shot_publish_root/maya/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
-    # define the location of a work area
-    asset_work_area_maya:
-        definition: '@asset_work_root/maya'
-    # define the location of a publish area
-    asset_publish_area_maya:
-        definition: '@asset_publish_root/maya'
-    # The location of WIP files
-    maya_asset_work:
-        definition: '@asset_work_root/maya/{name}.v{version}.{maya_extension}'
-    # The location of backups of WIP files
-    maya_asset_snapshot:
-        definition: '@asset_work_root/maya/snapshots/{name}.v{version}.{timestamp}.{maya_extension}'
-    # The location of published maya files
-    maya_asset_publish:
-        definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
+        definition: '@shot_publish_root/v{version}/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
 
-    #
-    # HOUDINI PATHS
-    #
+#
+# ALEMBIC PATHS
+#
+alembic_path: &alembic_path
 
+    # ASSET TEMPLATES
 
-    #
-    # Substance Painter
-    #
+    asset_alembic_cache:
+        definition: '@asset_root/publish/caches/{name}.v{version}.abc'
 
-    # asset
+    asset_alembic_publish:
+        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{lod}.v{version}.abc"
+
+    # SHOT TEMPLATES
+
+    shot_alembic_publish:
+        definition: "@shot_publish_root/v{version}/{Step}_{Asset}_{instance}.v{version}.abc"
+
+#
+# MATERIAL X PATHS
+#
+materialX_path: &materialX_path
+
+    # ASSET TEMPLATES
+
+    asset_materialX_publish:
+        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{lod}_{variant}.v{version}.mtlx"
+
+#
+# EXR RENDER PATHS
+#
+exr_path: &exr_path
+
+    # ASSET TEMPLATES
+
+    asset_exrTurnTableAOVs_publish:
+        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{aov}/{Step}_{Asset}_{pass}_{aov}.v{version}.exr"
+
+    asset_exrTurnTable_publish:
+        definition: "@asset_publish_root/turnTable/v{version}/{pass}/{Step}_{Asset}_{pass}.v{version}.exr"
+
+    # SHOT TEMPLATES
+
+    shot_exrRenderAOVs_publish:
+        definition: "@shot_publish_root/v{version}/{pass}/{aov}/{Step}_{Shot}_{pass}_{aov}.v{version}.exr"
+
+    shot_exrRender_publish:
+        definition: "@shot_publish_root/v{version}/{pass}/{Step}_{Shot}_{pass}.v{version}.exr"
+
+#
+# SUBSTANCE PAINTER PATHS
+#
+substance_painter_path: &substance_painter_path
+
+    # ASSET TEMPLATES
+
     # define the location of a work area
     asset_work_area_substancepainter:
         definition: '@asset_work_root/substancepainter'
@@ -289,36 +297,127 @@ paths:
     asset_publish_area_substancepainter:
         definition: '@asset_publish_root/substancepainter'
         root_name: 'primary'
-
     # The location of WIP files
     substancepainter_asset_work:
-        definition: '@asset_work_area_substancepainter/{name}.v{version}.spp'
+        definition: '@asset_work_area_substancepainter/{Step}_{Asset}_{name}.v{version}.spp'
         root_name: 'primary'
-
     # The location of backups of WIP files
     substancepainter_asset_snapshot:
-        definition: '@asset_work_area_substancepainter/snapshots/{name}.v{version}.{timestamp}.spp'
+        definition: '@asset_work_area_substancepainter/snapshots/{Step}_{Asset}_{name}.v{version}.{timestamp}.spp'
         root_name: 'primary'
-
     # The folder where the textures are exported for a project
     substancepainter_asset_textures_path_export:
         definition: '@asset_work_area_substancepainter/export'
         root_name: 'primary'
-
     # The location of published substance painter files
     substancepainter_asset_publish:
-        definition: '@asset_publish_area_substancepainter/{name}.v{version}.spp'
+        definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{name}.v{version}.spp'
         root_name: 'primary'
-
     # a texture folder publish
     substancepainter_asset_textures_path_publish:
-        definition: '@asset_publish_area_substancepainter/textures/{Asset}_textures_v{version}'
+        definition: '@asset_publish_root/v{version}'
         root_name: 'primary'
-
     # a texture folder publish
     substancepainter_asset_texture_path_publish:
-        definition: '@asset_publish_area_substancepainter/textures/{Asset}_{texture_name}_v{version}.{texture_extension}'
+        definition: '@asset_publish_root/v{version}/{Asset}_{texture_name}.v{version}.{texture_extension}'
         root_name: 'primary'
+
+#
+# HOUDINI PATHS
+#
+houdini_path: &houdini_path
+
+    # ASSET TEMPLATES
+
+    # define the location of a work area
+    asset_work_area_houdini:
+        definition: '@asset_work_root/houdini'
+    # define the location of a publish area
+    asset_publish_area_houdini:
+        definition: '@asset_publish_root/houdini'
+    # The location of WIP files
+    houdini_asset_work:
+        definition: '@asset_work_area_houdini/{Step}_{Asset}_{name}.v{version}.hip'
+    # The location of backups of WIP files
+    houdini_asset_snapshot:
+        definition: '@asset_work_area_houdini/snapshots/{name}.v{version}.{timestamp}.hip'
+    # The location of published houdini files
+    houdini_asset_publish:
+        definition: '@asset_publish_area_houdini/houdini/{name}.v{version}.hip'
+    # Alembic caches
+    houdini_asset_work_alembic_cache:
+        definition: '@asset_work_area_houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Asset}_{name}_v{version}.abc'
+    # Rendered images
+    houdini_asset_render:
+        definition: '@asset_work_root/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.exr'
+    # Additional mantra outputs
+    houdini_asset_ifd:
+        definition: '@asset_work_root/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.ifd'
+    houdini_asset_dcm:
+        definition: '@asset_work_root/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.dcm'
+    houdini_asset_extra_plane:
+        definition: '@asset_work_root/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.exr'
+
+    # SHOT TEMPLATES
+
+    # define the location of a work area
+    shot_work_area_houdini:
+        definition: '@shot_work_root/houdini'
+    # define the location of a publish area
+    shot_publish_area_houdini:
+        definition: '@shot_publish_root/houdini'
+    # The location of WIP files
+    houdini_shot_work:
+        definition: '@shot_work_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
+    # The location of backups of WIP files
+    houdini_shot_snapshot:
+        definition: '@shot_work_root/houdini/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.hip'
+    # The location of published houdini files
+    houdini_shot_publish:
+        definition: '@shot_publish_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
+    # Alembic caches
+    houdini_shot_work_alembic_cache:
+        definition: '@shot_work_root/houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Step}_{Shot}_{name}_v{version}.abc'
+    # Rendered images
+    houdini_shot_render:
+        definition: '@shot_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
+    # Additional mantra outputs
+    houdini_shot_ifd:
+        definition: '@shot_root/work/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.ifd'
+    houdini_shot_dcm:
+        definition: '@shot_root/work/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.dcm'
+    houdini_shot_extra_plane:
+        definition: '@shot_root/work/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
+
+
+paths:
+
+    # Common  path definitions to use as shorthand in order to avoid repetitive and verbose
+    # templates. This also makes it easy to change any of the common root paths and have the
+    # changes apply to all templates that use them.
+    #
+    # These don't require the standard formatting (with definition and root_name) because they
+    # will be set within each template that uses the alias.
+    asset_root: assets/{sg_asset_type}/{Asset}
+    sequence_root: sequences/{Sequence}
+    shot_root: "@sequence_root/{Shot}"
+
+
+    asset_publish_root: 
+        definition: "@asset_root/publish/{Step}"
+    asset_work_root:
+        definition: "@asset_root/work/{Step}"
+    shot_publish_root:
+        definition: "@shot_root/publish/{Step}"
+    shot_work_root:
+        definition: "@shot_root/work/{Step}"
+
+    <<: *maya_path
+    <<: *alembic_path
+    <<: *materialX_path
+    <<: *exr_path
+    <<: *substance_painter_path
+    <<: *houdini_path
 
     ##########################################################################################
     # Project level paths
@@ -420,49 +519,6 @@ paths:
         definition: '@shot_root/review/{Shot}_{name}_{afx.comp}_v{version}.{afx.mov.ext}'
 
 
-    #
-    # Maya
-    #
-
-
-
-    #
-    # Houdini
-    #
-
-    # define the location of a work area
-    shot_work_area_houdini:
-        definition: '@shot_work_root/houdini'
-    # define the location of a publish area
-    shot_publish_area_houdini:
-        definition: '@shot_publish_root/houdini'
-    # The location of WIP files
-    houdini_shot_work:
-        definition: '@shot_work_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
-    # The location of backups of WIP files
-    houdini_shot_snapshot:
-        definition: '@shot_work_root/houdini/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.hip'
-    # The location of published houdini files
-    houdini_shot_publish:
-        definition: '@shot_publish_root/houdini/{Step}_{Shot}_{name}.v{version}.hip'
-    # Alembic caches
-    houdini_shot_work_alembic_cache:
-        definition: '@shot_work_root/houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Step}_{Shot}_{name}_v{version}.abc'
-
-    # Rendered images
-    houdini_shot_render:
-        definition: '@shot_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
-
-    # Additional mantra outputs
-    houdini_shot_ifd:
-        definition: '@shot_root/work/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.ifd'
-
-    houdini_shot_dcm:
-        definition: '@shot_root/work/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.dcm'
-
-    houdini_shot_extra_plane:
-        definition: '@shot_root/work/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
-
 
     #
     # 3dsmax
@@ -550,15 +606,6 @@ paths:
     hiero_render_path:
         definition: 'sequences/{Sequence}/{Shot}/editorial/{YYYY}_{MM}_{DD}/renders/{project}_{Shot}.{SEQ}.dpx'
 
-    ##########################################################################################
-    # Asset pipeline
-
-
-    #
-    # Alembic caches
-    #
-
-
 
 
     #
@@ -625,38 +672,6 @@ paths:
     # Houdini
     #
 
-    # define the location of a work area
-    asset_work_area_houdini:
-        definition: '@asset_root/work/houdini'
-    # define the location of a publish area
-    asset_publish_area_houdini:
-        definition: '@asset_root/publish/houdini'
-    # The location of WIP files
-    houdini_asset_work:
-        definition: '@asset_root/work/houdini/{name}.v{version}.hip'
-    # The location of backups of WIP files
-    houdini_asset_snapshot:
-        definition: '@asset_root/work/houdini/snapshots/{name}.v{version}.{timestamp}.hip'
-    # The location of published houdini files
-    houdini_asset_publish:
-        definition: '@asset_root/publish/houdini/{name}.v{version}.hip'
-    # Alembic caches
-    houdini_asset_work_alembic_cache:
-        definition: '@asset_root/work/houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Asset}_{name}_v{version}.abc'
-
-    # Rendered images
-    houdini_asset_render:
-        definition: '@asset_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.exr'
-
-    # Additional mantra outputs
-    houdini_asset_ifd:
-        definition: '@asset_root/work/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.ifd'
-
-    houdini_asset_dcm:
-        definition: '@asset_root/work/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.dcm'
-
-    houdini_asset_extra_plane:
-        definition: '@asset_root/work/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Asset}_{name}_v{version}.{SEQ}.exr'
 
 
     #
