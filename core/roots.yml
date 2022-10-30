@@ -48,10 +48,10 @@ primary:
 
     # these paths will be populated by the associated local storage in Shotgun
     # at setup time.
-    mac_path:
-    shotgun_storage_id: 200
+    mac_path: null
+    shotgun_storage_id: 102
     linux_path: /mnt/P3D/FRAMTEST/shows
-    windows_path: Y:\shows
+    windows_path: P:\shows
 
     # indicates that this is the default storage root
     default: true
