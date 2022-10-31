@@ -25,6 +25,16 @@ settings.tk-houdini-alembicnode.asset_step:
     output_cache_template: houdini_asset_work_alembic_cache
   location: "@apps.tk-houdini-alembicnode.location"
 
+settings.tk-houdini-alembicnode.sequence_step:
+  work_file_template: houdini_sequence_work
+  default_node_name: sg_alembic_out
+  output_profiles:
+  - name: Sequence Work Cache
+    settings: {}
+    color: []
+    output_cache_template: houdini_sequence_work_alembic_cache
+  location: "@apps.tk-houdini-alembicnode.location"
+
 settings.tk-houdini-alembicnode.shot_step:
   work_file_template: houdini_shot_work
   default_node_name: sg_alembic_out
@@ -33,4 +43,14 @@ settings.tk-houdini-alembicnode.shot_step:
     settings: {}
     color: []
     output_cache_template: houdini_shot_work_alembic_cache
+  location: "@apps.tk-houdini-alembicnode.location"
+
+settings.tk-houdini-alembicnode.rnd_step:
+  work_file_template: houdini_rnd_work
+  default_node_name: sg_alembic_out
+  output_profiles:
+  - name: RnD Work Cache
+    settings: {}
+    color: []
+    output_cache_template: houdini_rnd_work_alembic_cache
   location: "@apps.tk-houdini-alembicnode.location"

@@ -15,6 +15,48 @@ includes:
 
 ################################################################################
 
+# Default parameters.
+settings.tk-multi-loader2.defaultEntities: &settings_tk-multi-loader2_defaultEntities
+  entities:
+  - caption       : Assets
+    entity_type   : Asset
+    filters       :
+    - [project, is, "{context.project}"]
+    hierarchy     : [sg_asset_type, code]
+
+  - caption       : Sequences
+    entity_type   : Sequence
+    filters       :
+    - [project, is, "{context.project}"]
+    hierarchy     : [code]
+
+  - caption       : Shots
+    entity_type   : Shot
+    filters       :
+    - [project, is, "{context.project}"]
+    hierarchy     : [sg_sequence, code]
+
+  - caption       : RnD
+    entity_type   : CustomEntity03
+    filters       :
+    - [project, is, "{context.project}"]
+    hierarchy     : [sg_type, code]
+
+  - caption       : My Tasks
+    entity_type   : Task
+    filters       :
+    - [task_assignees, is, "{context.user}"]
+    - [project, is, "{context.project}"]
+    hierarchy     : [entity, content]
+
+settings.tk-multi-loader2.defaultPublishFilter: &settings_tk-multi-loader2_defaultPublishFilter
+  publish_filters: [["sg_status_list", "is_not", null]]
+
+settings.tk-multi-loader2.defaultLocation: &settings_tk-multi-loader2_defaultLocation
+  location: "@apps.tk-multi-loader2.location"
+
+################################################################################
+
 # 3dsmaxplus
 settings.tk-multi-loader2.3dsmaxplus: &settings_tk-multi-loader2_3dsmaxplus
   action_mappings:
@@ -76,25 +118,9 @@ settings.tk-multi-loader2.houdini:
     Photoshop Image: [file_cop]
     Rendered Image: [file_cop]
     Texture: [file_cop]
-  entities:
-  - caption: Assets
-    entity_type: Asset
-    filters:
-    - [project, is, '{context.project}']
-    hierarchy: [sg_asset_type, code]
-  - caption: Shots
-    entity_type: Shot
-    filters:
-    - [project, is, '{context.project}']
-    hierarchy: [sg_sequence, code]
-  - caption: My Tasks
-    entity_type: Task
-    filters:
-    - [task_assignees, is, '{context.user}']
-    - [project, is, '{context.project}']
-    hierarchy: [entity, content]
-  publish_filters: [["sg_status_list", "is_not", null]]
-  location: "@apps.tk-multi-loader2.location"
+  <<: *settings_tk-multi-loader2_defaultEntities
+  <<: *settings_tk-multi-loader2_defaultPublishFilter
+  <<: *settings_tk-multi-loader2_defaultLocation
 
 # mari
 settings.tk-multi-loader2.mari:
@@ -140,6 +166,12 @@ settings.tk-multi-loader2.maya:
       - [entity, is_not, null]
       - [entity, type_is, Asset]
 
+  - caption: Sequences
+    entity_type: Sequence
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [code]
+
   - caption: Shots
     entity_type: Task
     filters:
@@ -147,6 +179,12 @@ settings.tk-multi-loader2.maya:
       - [entity, is_not, null]
       - [entity, type_is, Shot]
     hierarchy: [entity.Shot.sg_sequence, entity, content]
+
+  - caption: RnD
+    entity_type: CustomEntity03
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [sg_type, code]
 
   # P3D Customize Asset Tab END
 

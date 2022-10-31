@@ -77,6 +77,23 @@ settings.tk-multi-publish2.maya.asset_step:
 
   location: "@apps.tk-multi-publish2.location"
 
+# SEQUENCE STEP
+settings.tk-multi-publish2.maya.sequence_step:
+  collector: "{self}/collector.py:{config}/tk-multi-publish2/maya/collector.py"
+  
+  collector_settings:
+      Work Template: maya_sequence_work
+  
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+
+  location: "@apps.tk-multi-publish2.location"
+
 # SHOT STEP
 settings.tk-multi-publish2.maya.shot_step:
   collector: "{self}/collector.py:{config}/tk-multi-publish2/maya/collector.py"
@@ -95,5 +112,22 @@ settings.tk-multi-publish2.maya.shot_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shot_assetInstance_alembic.py"
     settings:
         Shot AssetInstance Alembic Publish Template: shot_alembic_publish
+
+  location: "@apps.tk-multi-publish2.location"
+
+# RND STEP
+settings.tk-multi-publish2.maya.rnd_step:
+  collector: "{self}/collector.py:{config}/tk-multi-publish2/maya/collector.py"
+  
+  collector_settings:
+      Work Template: maya_rnd_work
+  
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
 
   location: "@apps.tk-multi-publish2.location"

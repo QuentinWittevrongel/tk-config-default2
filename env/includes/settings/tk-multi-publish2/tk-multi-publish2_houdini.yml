@@ -1,0 +1,98 @@
+includes:
+- ../../app_locations.yml
+
+# ASSET STEP
+settings.tk-multi-publish2.houdini.asset_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: houdini_asset_work
+
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
+    settings:
+        Publish Template: houdini_asset_publish
+
+  location: "@apps.tk-multi-publish2.location"
+
+# SEQUENCE STEP
+settings.tk-multi-publish2.houdini.sequence_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: houdini_sequence_work
+  
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
+    settings:
+        Publish Template: houdini_sequence_publish
+
+  location: "@apps.tk-multi-publish2.location"
+
+# SHOT STEP
+settings.tk-multi-publish2.houdini.shot_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: houdini_shot_work
+  
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
+    settings:
+        Publish Template: houdini_shot_publish
+
+  location: "@apps.tk-multi-publish2.location"
+
+# RND STEP
+settings.tk-multi-publish2.houdini.rnd_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+  
+  collector_settings:
+      Work Template: houdini_rnd_work
+  
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/publish_session.py"
+    settings:
+        Publish Template: houdini_rnd_publish
+
+  location: "@apps.tk-multi-publish2.location"
