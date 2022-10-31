@@ -113,6 +113,16 @@ class BeforeAppLaunch(tank.Hook):
                 # Add aTools.
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\aTools\\2.02\\module")
 
+                if(projectName == "ADAM"):
+                    # Add Adam modules.
+                    self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\modules")
+                    # Add Adam scripts.
+                    self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\maya\\scripts")
+                    # Add Adam rig nodes.
+                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes-0.1.2\\module")
+                    # Add Alembic 2.0.
+                    self.addToEnvironmentEnd("MAYA_PLUG_IN_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\alembic\\2.0\\maya2023\\plug-ins")
+
             else:
                 pass
         
@@ -127,7 +137,10 @@ class BeforeAppLaunch(tank.Hook):
                 self.addToEnvironmentEnd('HOUDINI_OTLSCAN_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0\\farmTools\\dccs\\houdini\\hda')                
                 self.addToEnvironmentEnd('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0')
                 self.addToEnvironmentBegin('HOUDINI_MENU_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0\\farmTools\\dccs\\houdini\\menus')
-        
+
+                # Add SideFXLabs.
+                self.addToEnvironmentBegin('HOUDINI_PACKAGE_DIR', 'C:\\Program Files\\Side Effects Software\\sidefx_packages')
+
                 # Add P3D HDA.
                 self.addToEnvironmentEnd('HOUDINI_OTLSCAN_PATH', 'Z:\\P3DTools\\productionPackages\\houdini\\otls')
                 self.addToEnvironmentEnd('HOUDINI_VEX_PATH', 'Z:\\P3DTools\\productionPackages\\houdini\\vex')
