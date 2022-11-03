@@ -58,7 +58,7 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
 
         # Add the publish path datas to the publish item.
         # That allow us to reuse the datas for the publish.
-        publihTools.addPublishDatasToPublishItem(self, item, self.propertiesPublishTemplate, addFields={"lod":"MI"})
+        publihTools.addPublishDatasToPublishItem(self, item, self.propertiesPublishTemplate, addFields={"lod":"mid"})
 
         # run the base class validation
         return super(MayaAssetAlembicMIPublishPlugin, self).validate(settings, item)
@@ -87,7 +87,9 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
             meshes,
             1,
             1,
-            publish_path)
+            publish_path,
+            exportABCVersion=2,
+            spaceType="local")
 
         # let the base class register the publish
         super(MayaAssetAlembicMIPublishPlugin, self).publish(settings, item)

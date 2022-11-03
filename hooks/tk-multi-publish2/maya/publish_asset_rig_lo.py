@@ -41,7 +41,7 @@ class MayaAssetRigLOPublishPlugin(HookBaseClass):
             item,
             self.propertiesPublishTemplate,
             isChild=True,
-            addFields={"lod":"LO"}
+            addFields={"lod":"low"}
         )
 
         # run the base class validation

@@ -219,18 +219,18 @@ maya_path: &maya_path
         definition: '@asset_publish_root/maya'
     # The location of WIP files
     maya_asset_work:
-        definition: '@asset_work_area_maya/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
+        definition: '@asset_work_area_maya/scenes/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_asset_snapshot:
         definition: '@asset_work_area_maya/snapshots/{Step}_{Asset}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of the asset previews file.
     maya_asset_previews:
-        definition: '@asset_work_area_maya/previews/{Step}_{Asset}.v{version}.mp4'
+        definition: '@asset_work_area_maya/previews/{Step}_{Asset}_{name}.v{version}.mp4'
     # The location of published maya files
     maya_asset_publish:
-        definition: '@asset_publish_root/v{version}/{Step}_{Asset}.v{version}.{maya_extension}'
+        definition: '@asset_publish_root/v{version}/maya/{Step}_{Asset}_{name}.v{version}.{maya_extension}'
     maya_asset_rig_publish:
-        definition: '@asset_publish_root/v{version}/{Step}_{Asset}_{lod}.v{version}.{maya_extension}'
+        definition: '@asset_publish_root/v{version}/maya/{Step}_{Asset}_{name}_{lod}.v{version}.{maya_extension}'
 
     # SEQUENCE TEMPLATES
 
@@ -297,7 +297,7 @@ alembic_path: &alembic_path
         definition: '@asset_root/publish/caches/{name}.v{version}.abc'
 
     asset_alembic_publish:
-        definition: "@asset_publish_root/v{version}/{Step}_{Asset}_{lod}.v{version}.abc"
+        definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}_{lod}.v{version}.abc"
 
     # SHOT TEMPLATES
 

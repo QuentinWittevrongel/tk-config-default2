@@ -42,6 +42,10 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_technical.py"
     settings:
         Asset Alembic Tech Publish Template: asset_alembic_publish
+  - name: Publish Asset Alembic Sculpt
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_sculpt.py"
+    settings:
+        Asset Alembic Sculpt Publish Template: asset_alembic_publish
   - name: Publish Asset Scene
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_scene.py"
     settings:
@@ -74,6 +78,9 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_materialX_hi.py"
     settings:
         Asset MaterialX HI Publish Template: asset_materialX_publish
+  - name: Upload for review
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/review_playblast.py"
+    settings: {}
 
   location: "@apps.tk-multi-publish2.location"
 

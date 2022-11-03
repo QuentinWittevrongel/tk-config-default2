@@ -12,11 +12,11 @@ publihTools = P3Dfw.PublishTools()
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
+class MayaAssetAlembicSculptPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        self.logger.info("Asset Alembic Low Publish | accept")
+        self.logger.info("Asset Alembic Sculpt Publish | accept")
 
         accepted = True
         # Get the publish plugin publish template.
@@ -32,12 +32,15 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
         # natively.
         item.context_change_allowed = False
         # We use the MayaAsset Class stored in the item to do checking.
-        mayaAsset = item.parent.properties.get("assetObject")
-        # Check if the group MI is not empty.
+        mayaAsset = item.properties.get("assetObject")
+        # Check if the asset is not empty.
         # If its empty we don't need to publish it.
-        meshes = mayaAsset.meshesHI
-        if(len(meshes) == 0):
-            self.logger.debug("The Low group is empty.")
+        meshes = cmds.listRelatives(mayaAsset.fullname, children=True, fullPath=True, type="transform")
+
+        self.logger.debug(meshes)
+
+        if(not meshes):
+            self.logger.debug("The asset {} is empty.".format(mayaAsset.fullname))
             accepted= False
 
         return {"accepted": accepted, "checked": True}
@@ -45,23 +48,23 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        self.logger.info("Asset Alembic Low Publish | validate")
+        self.logger.info("Asset Alembic Sculpt Publish | validate")
 
         # We use the MayaAsset class stored in the item to check if the current asset is a valid asset.
-        mayaAsset = item.parent.properties.get("assetObject")
+        mayaAsset = item.properties.get("assetObject")
 
-        # Check if the asset root is a valid asset.
-        if not (mayaAsset.isValid()):
-            error_msg = "The asset %s is not a valid. Please check the asset group structure."
-            self.logger.error(error_msg, extra=_get_save_as_action)
-            raise Exception(error_msg)
+        # # Check if the asset root is a valid asset.
+        # if not (mayaAsset.isValid()):
+        #     error_msg = "The asset %s is not a valid. Please check the asset group structure."
+        #     self.logger.error(error_msg, extra=_get_save_as_action)
+        #     raise Exception(error_msg)
 
         # Add the publish path datas to the publish item.
         # That allow us to reuse the datas for the publish.
-        publihTools.addPublishDatasToPublishItem(self, item, self.propertiesPublishTemplate, addFields={"lod":"high"})
+        publihTools.addPublishDatasToPublishItem(self, item, self.propertiesPublishTemplate, addFields={"lod":"sculpt"})
 
         # run the base class validation
-        return super(MayaAssetAlembicHIPublishPlugin, self).validate(settings, item)
+        return super(MayaAssetAlembicSculptPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
@@ -70,7 +73,7 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
         publisher = self.parent
 
         # Get the item asset object.
-        mayaObject = item.parent.properties["assetObject"]
+        mayaObject = item.properties["assetObject"]
 
         # get the path to create and publish
         publish_path = item.properties["path"]
@@ -79,8 +82,8 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
         publish_folder = os.path.dirname(publish_path)
         self.parent.ensure_folder_exists(publish_folder)
 
-        # Get the MI meshes from the maya asset.
-        meshes = mayaObject.meshesHI
+        # Get the root from the maya asset.
+        meshes = [mayaObject.fullname]
 
         # Export the alembic.
         publihTools.exportAlembic(
@@ -92,15 +95,15 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
             spaceType="local")
 
         # let the base class register the publish
-        super(MayaAssetAlembicHIPublishPlugin, self).publish(settings, item)
+        super(MayaAssetAlembicSculptPublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
-        return "Asset Alembic HI Publish Template"
+        return "Asset Alembic Sculpt Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "asset_alembic_hi_publish_template"
+        return "asset_alembic_sculpt_publish_template"
 
     @property
     def description(self):
@@ -112,7 +115,7 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaAssetAlembicHIPublishPlugin, self).settings or {}
+        base_settings = super(MayaAssetAlembicSculptPublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
@@ -132,7 +135,7 @@ class MayaAssetAlembicHIPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.alembicHI"]
+        return ["maya.asset.alembicSCULPT"]
 
 def _session_path():
     """

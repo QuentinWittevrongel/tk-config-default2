@@ -41,7 +41,7 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
             item,
             self.propertiesPublishTemplate,
             isChild=True,
-            addFields={"lod":"MI"}
+            addFields={"lod":"mid"}
         )
 
         # run the base class validation
