@@ -296,8 +296,11 @@ alembic_path: &alembic_path
     asset_alembic_cache:
         definition: '@asset_root/publish/caches/{name}.v{version}.abc'
 
-    asset_alembic_publish:
+    asset_alembic_lod_publish:
         definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}_{lod}.v{version}.abc"
+
+    asset_alembic_publish:
+        definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}.v{version}.abc"
 
     # SHOT TEMPLATES
 

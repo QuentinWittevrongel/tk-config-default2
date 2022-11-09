@@ -29,23 +29,23 @@ settings.tk-multi-publish2.maya.asset_step:
   - name: Publish Asset Alembic LO
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_lo.py"
     settings:
-        Asset Alembic LO Publish Template: asset_alembic_publish
+        Asset Alembic LO Publish Template: asset_alembic_lod_publish
   - name: Publish Asset Alembic MI
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_mi.py"
     settings:
-        Asset Alembic MI Publish Template: asset_alembic_publish
+        Asset Alembic MI Publish Template: asset_alembic_lod_publish
   - name: Publish Asset Alembic HI
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_hi.py"
     settings:
-        Asset Alembic HI Publish Template: asset_alembic_publish
+        Asset Alembic HI Publish Template: asset_alembic_lod_publish
   - name: Publish Asset Alembic Tech
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_technical.py"
     settings:
-        Asset Alembic Tech Publish Template: asset_alembic_publish
+        Asset Alembic Tech Publish Template: asset_alembic_lod_publish
   - name: Publish Asset Alembic Sculpt
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_sculpt.py"
     settings:
-        Asset Alembic Sculpt Publish Template: asset_alembic_publish
+        Asset Alembic Sculpt Publish Template: asset_alembic_lod_publish
   - name: Publish Asset Scene
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_scene.py"
     settings:
@@ -81,6 +81,14 @@ settings.tk-multi-publish2.maya.asset_step:
   - name: Upload for review
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/review_playblast.py"
     settings: {}
+  - name: Publish Environment Scene
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_environment_scene.py"
+    settings:
+        Environment Scene Publish Template: maya_asset_publish
+  - name: Publish Environment Alembic 
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_environment_alembic.py"
+    settings:
+        Environment Alembic Publish Template: asset_alembic_publish
 
   location: "@apps.tk-multi-publish2.location"
 

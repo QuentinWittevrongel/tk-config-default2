@@ -110,6 +110,8 @@ class MayaSessionCollector(HookBaseClass):
             elif(ctxtStep["name"] == "Rig"):
                 self.collect_for_rig_publish(settings, parent_item)
 
+                self.collect_for_env_publish(settings, parent_item)
+
             elif(ctxtStep["name"] == "Shading"):
                 self.collect_for_shd_publish(settings, parent_item)
 
@@ -172,6 +174,7 @@ class MayaSessionCollector(HookBaseClass):
 
             #self.collect_selected_asset(item)
 
+
     def collect_for_shot_animation_publish(self, settings, parent_item):
         ''' Create the items to publish animation alembic.
 
@@ -222,8 +225,6 @@ class MayaSessionCollector(HookBaseClass):
                     item.properties["work_template"] = work_template
                     self.logger.debug("Work template defined for Maya collection.")
 
-
-
     def collect_for_model_publish(self, settings, parent_item):
         """
         Create the items for the model pipeline step publish.
@@ -273,8 +274,6 @@ class MayaSessionCollector(HookBaseClass):
                 abcAssetItem.properties["work_template"] = work_template
                 self.logger.debug("Work template defined for Maya collection.")
 
-
-
     def collect_for_shd_publish(self, settings, parent_item):
         ''' Create an item represents the current selected asset shd.
 
@@ -308,7 +307,6 @@ class MayaSessionCollector(HookBaseClass):
                 shdMiItem.set_icon_from_path(mtlxIcon)
                 shdHiItem = mainItem.create_item("maya.asset.materialXHI", "Asset MaterialX HI", asset)
                 shdHiItem.set_icon_from_path(mtlxIcon) 
-
 
     def collect_for_rig_publish(self, settings, parent_item):
         ''' Create an item represents the current selected asset rig.
@@ -349,6 +347,32 @@ class MayaSessionCollector(HookBaseClass):
 
             # Create the alembic export.
             self.collect_asset(settings, parent_item, asset, ma='none', abc='lod')
+
+    def collect_for_env_publish(self, settings, parent_item):
+        ''' Create an item represents the environments.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Collect all the environments (Root groups that ends with '_ENV')
+        mRoots = self.get_root_transforms_by_tag('ENV')
+
+        # Create an item for each environment.
+        for environment in mRoots:
+            # Create the main environment item.
+            mainItem = self.collect_environment(
+                settings,
+                parent_item,
+                environment
+            )
+
+            # Create the child environment item.
+            abcIcon = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+
+            envAbcItem = mainItem.create_item("maya.environment.alembic", "Environment Alembic", environment)
+            envAbcItem.set_icon_from_path(abcIcon)
+
 
     def collect_mayaAsset(self, settings, parent_item, assetRoot, itemName, itemType):
         """ Collect an asset.
@@ -517,6 +541,59 @@ class MayaSessionCollector(HookBaseClass):
 
 
         return assetItem
+
+    def collect_environment(self, settings, parent_item, environmentRoot):
+        """ Collect an environment.
+
+        Args:
+            settings            (dict)          : Configured settings for this collector.
+            parent_item         ()              : Parent Item instance.
+            environmentRoot     (str)           : The environment root name.
+            ma                  (str, optional) : Set the export type for the maya file.
+                                                Can be single, lod or none.
+                                                Default to single.
+            abc                 (str, optional) : Set the export type for the alembic file.
+                                                Can be single, lod or none.
+                                                Default to lod.
+
+        Returns:
+            item : The new ui item.
+        """
+        publisher = self.parent
+
+        # Create the ui item for the environment.
+        environmentItem = parent_item.create_item("maya.environment", "Environment", environmentRoot)
+
+        # Get the icon path to display for this item
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        environmentItem.set_icon_from_path(icon_path)
+
+        # Add the asset project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        environmentItem.properties["project_root"] = project_root
+
+        # Create the environment object an add it to the item properties.
+        environmentItem.properties["assetObject"] = environmentRoot
+
+        # if a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins
+        work_template_setting = settings.get("Work Template")
+        if(work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # store the template on the item for use by publish plugins. we
+            # can't evaluate the fields here because there's no guarantee the
+            # current session path won't change once the item has been created.
+            # the attached publish plugins will need to resolve the fields at
+            # execution time.
+            environmentItem.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+        # Return the environment item.
+        return environmentItem
 
     def create_item_maya(self, parent_item, assetRoot):
         """ Create an item to export the asset as maya ascii.
@@ -783,6 +860,7 @@ class MayaSessionCollector(HookBaseClass):
                 # the item has been created. update the display name to include
                 # the an indication of what it is and why it was collected
                 item.name = "%s (Render Layer: %s)" % (item.name, layer)
+
 
     def collect_review(self, parent_item, context):
         """
