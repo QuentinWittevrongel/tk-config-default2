@@ -31,16 +31,16 @@ class MayaAssetAlembicSculptPublishPlugin(HookBaseClass):
         # is a temporary measure until the publisher handles context switching
         # natively.
         item.context_change_allowed = False
-        # We use the MayaAsset Class stored in the item to do checking.
+        # Get the object.
         mayaAsset = item.properties.get("assetObject")
         # Check if the asset is not empty.
         # If its empty we don't need to publish it.
-        meshes = cmds.listRelatives(mayaAsset.fullname, children=True, fullPath=True, type="transform")
+        meshes = cmds.listRelatives(mayaAsset, children=True, fullPath=True, type="transform")
 
         self.logger.debug(meshes)
 
         if(not meshes):
-            self.logger.debug("The asset {} is empty.".format(mayaAsset.fullname))
+            self.logger.debug("The asset {} is empty.".format(mayaAsset))
             accepted= False
 
         return {"accepted": accepted, "checked": True}
@@ -83,7 +83,7 @@ class MayaAssetAlembicSculptPublishPlugin(HookBaseClass):
         self.parent.ensure_folder_exists(publish_folder)
 
         # Get the root from the maya asset.
-        meshes = [mayaObject.fullname]
+        meshes = [mayaObject]
 
         # Export the alembic.
         publihTools.exportAlembic(

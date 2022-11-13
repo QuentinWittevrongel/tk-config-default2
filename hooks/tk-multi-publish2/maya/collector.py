@@ -98,7 +98,7 @@ class MayaSessionCollector(HookBaseClass):
             #   - Export MA by resolution with baked namespace.
             #   - Export ABC by resolution. (With buffers for shading to later export correct materialX)
 
-            # Collect all the playblast for review.
+            # Collect all the playblasts for review.
             self.collect_review(parent_item, currentContext)
 
             # Set the P3D publish pipeline.
@@ -172,8 +172,109 @@ class MayaSessionCollector(HookBaseClass):
             if cmds.ls(geometry=True, noIntermediate=True):
                 self._collect_session_geometry(item)
 
-            #self.collect_selected_asset(item)
+# COLLECT BY STEP FUNCTIONS.
 
+    def collect_for_model_publish(self, settings, parent_item):
+        ''' Create an item representing the current selection for the MDL pipeline step.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Get the selection.
+        mSelection = cmds.ls(sl=True, long=True, type="transform")
+
+        # Loop over the selection and check the end tag.
+        for transform in mSelection:
+
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'RIG')):
+                # Create the asset publish item.
+                self.collect_asset(settings, parent_item, transform)
+
+            elif(self.check_end_tag(transform, 'SCULPT')):
+                # Create the sculpt publish item.
+                self.collect_sculpt(settings, parent_item, transform)
+
+            else:
+                # Create a default publish item.
+                pass
+
+    def collect_for_rig_publish(self, settings, parent_item):
+        ''' Create an item representing the current selection for the RIG pipeline step.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Get the selection.
+        mSelection = cmds.ls(sl=True, long=True, type="transform")
+
+        # Loop over the selection and check the end tag.
+        for transform in mSelection:
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'RIG')):
+                # Create the asset publish item.
+                self.collect_asset_rig(settings, parent_item, transform)
+
+            else:
+                # Create a default publish item.
+                pass
+
+    def collect_for_shd_publish(self, settings, parent_item):
+        ''' Create an item represents the current selected asset shd.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Get the current maya selection.
+        mSelection = cmds.ls(sl=True, type="transform")
+
+        # Check if the current selection is not empty.
+        if(len(mSelection) > 0):
+
+            # Create an item for each selected asset.
+            for asset in mSelection:
+                
+                # Create the main rig item.
+                mainItem = self.collect_mayaAsset(
+                    settings,
+                    parent_item,
+                    asset,
+                    "Asset Shading Master",
+                    "maya.asset"
+                )
+                # Create the child rig item.
+                mtlxIcon = os.path.join(self.disk_location, os.pardir, "icons", "materialX.png")
+
+                shdLoItem = mainItem.create_item("maya.asset.materialXLO", "Asset MaterialX LO", asset)
+                shdLoItem.set_icon_from_path(mtlxIcon)
+                shdMiItem = mainItem.create_item("maya.asset.materialXMI", "Asset MaterialX MI", asset)
+                shdMiItem.set_icon_from_path(mtlxIcon)
+                shdHiItem = mainItem.create_item("maya.asset.materialXHI", "Asset MaterialX HI", asset)
+                shdHiItem.set_icon_from_path(mtlxIcon) 
+
+    def collect_for_env_publish(self, settings, parent_item):
+        ''' Create an item represents the environments.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Get the selection.
+        mSelection = cmds.ls(sl=True, long=True, type="transform")
+
+        # Loop over the selection and check the end tag.
+        for transform in mSelection:
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'ENV')):
+                # Create the asset publish item.
+                self.collect_environment(settings, parent_item, transform)
+
+            else:
+                # Create a default publish item.
+                pass
 
     def collect_for_shot_animation_publish(self, settings, parent_item):
         ''' Create the items to publish animation alembic.
@@ -225,154 +326,7 @@ class MayaSessionCollector(HookBaseClass):
                     item.properties["work_template"] = work_template
                     self.logger.debug("Work template defined for Maya collection.")
 
-    def collect_for_model_publish(self, settings, parent_item):
-        """
-        Create the items for the model pipeline step publish.
-
-        :param dict settings: Configured settings for this collector
-        :param parent_item: Root item instance
-        """
-
-        # self.collect_selected_assets(settings, parent_item)
-
-        # Collect all the assets (Root groups that ends with '_RIG')
-        self.collect_assets_tag(settings, parent_item, tag='RIG')
-
-        # Collect all the sculpts (Root groups that ends with '_SCULPT')
-        mRoots = self.get_root_transforms_by_tag('SCULPT')
-        for root in mRoots:
-
-            publisher = self.parent
-
-            abcIconPath     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
-            abcAssetItem    = parent_item.create_item("maya.asset.alembicSCULPT", "Alembic Sculpt", "%s Sculpt" % root)
-            abcAssetItem.set_icon_from_path(abcIconPath)
-
-            # Add the asset project root to the item properties.
-            project_root = cmds.workspace(q=True, rootDirectory=True)
-            abcAssetItem.properties["project_root"] = project_root
-
-            # Create the asset object an add it to the item properties.
-            # That allow to share the MayaAsset Class with the publish plugin.
-            mayaAsset = P3Dfw.MayaAsset(assetRoot=root)
-            abcAssetItem.properties["assetObject"] = mayaAsset
-
-            # If a work template is defined, add it to the item properties so
-            # that it can be used by attached publish plugins.
-            work_template_setting = settings.get("Work Template")
-            if (work_template_setting):
-
-                work_template = publisher.engine.get_template_by_name(
-                    work_template_setting.value
-                )
-
-                # Store the template on the item for use by publish plugins. We
-                # can't evaluate the fields here because there's no guarantee the
-                # current session path won't change once the item has been created.
-                # The attached publish plugins will need to resolve the fields at
-                # execution time.
-                abcAssetItem.properties["work_template"] = work_template
-                self.logger.debug("Work template defined for Maya collection.")
-
-    def collect_for_shd_publish(self, settings, parent_item):
-        ''' Create an item represents the current selected asset shd.
-
-        Args:
-            setting         (dict)      : Configured settings for this collector
-            parent_item     (sgItemUI)  : Root item instance
-        '''
-        # Get the current maya selection.
-        mSelection = cmds.ls(sl=True, type="transform")
-
-        # Check if the current selection is not empty.
-        if(len(mSelection) > 0):
-
-            # Create an item for each selected asset.
-            for asset in mSelection:
-                
-                # Create the main rig item.
-                mainItem = self.collect_mayaAsset(
-                    settings,
-                    parent_item,
-                    asset,
-                    "Asset Shading Master",
-                    "maya.asset"
-                )
-                # Create the child rig item.
-                mtlxIcon = os.path.join(self.disk_location, os.pardir, "icons", "materialX.png")
-
-                shdLoItem = mainItem.create_item("maya.asset.materialXLO", "Asset MaterialX LO", asset)
-                shdLoItem.set_icon_from_path(mtlxIcon)
-                shdMiItem = mainItem.create_item("maya.asset.materialXMI", "Asset MaterialX MI", asset)
-                shdMiItem.set_icon_from_path(mtlxIcon)
-                shdHiItem = mainItem.create_item("maya.asset.materialXHI", "Asset MaterialX HI", asset)
-                shdHiItem.set_icon_from_path(mtlxIcon) 
-
-    def collect_for_rig_publish(self, settings, parent_item):
-        ''' Create an item represents the current selected asset rig.
-
-        Args:
-            setting         (dict)      : Configured settings for this collector
-            parent_item     (sgItemUI)  : Root item instance
-        '''
-        # Get the current maya selection.
-        # mSelection = cmds.ls(sl=True, type="transform")
-
-        # # Check if the current selection is not empty.
-        # if(len(mSelection) > 0):
-
-        # Collect all the assets (Root groups that ends with '_RIG')
-        mRoots = self.get_root_transforms_by_tag('RIG')
-
-        # Create an item for each selected asset.
-        for asset in mRoots:
-            
-            # Create the main rig item.
-            mainItem = self.collect_mayaAsset(
-                settings,
-                parent_item,
-                asset,
-                "Asset Rig Master",
-                "maya.asset.rigMaster"
-            )
-            # Create the child rig item.
-            mayaIcon = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
-
-            rigLoItem = mainItem.create_item("maya.asset.rigLO", "Asset Rig LO", asset)
-            rigLoItem.set_icon_from_path(mayaIcon)
-            rigMiItem = mainItem.create_item("maya.asset.rigMI", "Asset Rig MI", asset)
-            rigMiItem.set_icon_from_path(mayaIcon)
-            rigHiItem = mainItem.create_item("maya.asset.rigHI", "Asset Rig HI", asset)
-            rigHiItem.set_icon_from_path(mayaIcon)
-
-            # Create the alembic export.
-            self.collect_asset(settings, parent_item, asset, ma='none', abc='lod')
-
-    def collect_for_env_publish(self, settings, parent_item):
-        ''' Create an item represents the environments.
-
-        Args:
-            setting         (dict)      : Configured settings for this collector
-            parent_item     (sgItemUI)  : Root item instance
-        '''
-        # Collect all the environments (Root groups that ends with '_ENV')
-        mRoots = self.get_root_transforms_by_tag('ENV')
-
-        # Create an item for each environment.
-        for environment in mRoots:
-            # Create the main environment item.
-            mainItem = self.collect_environment(
-                settings,
-                parent_item,
-                environment
-            )
-
-            # Create the child environment item.
-            abcIcon = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
-
-            envAbcItem = mainItem.create_item("maya.environment.alembic", "Environment Alembic", environment)
-            envAbcItem.set_icon_from_path(abcIcon)
-
+# COLLECT BY ELEMENT FUNCTIONS.
 
     def collect_mayaAsset(self, settings, parent_item, assetRoot, itemName, itemType):
         """ Collect an asset.
@@ -422,147 +376,21 @@ class MayaSessionCollector(HookBaseClass):
 
         return assetItem
 
-    def collect_selected_assets(self, settings, parent_item):
-        """
-        Create an item represents the current selected asset.
-
-        :param parent_item: Parent Item instance
-        """
-        print("SGTK | Collector | Collect the session's selected assets.")
-
-        # Get the current maya selection.
-        mSelection = cmds.ls(sl=True, type="transform")
-
-        # Check if the current selection is not empty.
-        if(len(mSelection) > 0):
-
-            # Create an item for each selected asset.
-            for asset in mSelection:
-
-                self.collect_asset(settings, parent_item, asset)
-
-    def get_root_transforms_by_tag(self, tag):
-        """
-        Get the root transform that ends with the selected tag.
-
-        Args:
-            tag (str): The tag to search.
-        
-        Returns:
-            list: The list of root transform that ends with the selected tag.
-        """
-        # Get all the root transforms and the selected tag.
-        mRoots = [root for root in cmds.ls(assemblies=True, long=True)
-            if (cmds.nodeType(root) == 'transform' and
-                root.endswith('_{}'.format(tag)))
-        ]
-        return mRoots
-
-    def collect_assets_tag(self, settings, parent_item, tag='RIG'):
-        """
-        Create an item representing each asset with the selected tag.
-
-        :param parent_item: Parent Item instance
-        """
-        print("SGTK | Collector | Collect the session's assets with tag: " + tag)
-
-        # Get all the root transforms and the selected tag.
-        mRoots = self.get_root_transforms_by_tag(tag)
-
-        # Loop through the roots and create an item for each.
-        for root in mRoots:
-            self.collect_asset(settings, parent_item, root)
-
-    def collect_asset(self, settings, parent_item, assetRoot, ma='single', abc='lod'):
-        """ Collect an asset.
-
-        Args:
-            settings    (dict)          : Configured settings for this collector.
-            parent_item ()              : Parent Item instance.
-            assetRoot   (str)           : The asset root name.
-            ma          (str, optional) : Set the export type for the maya file.
-                                        Can be single, lod or none.
-                                        Default to single.
-            abc         (str, optional) : Set the export type for the alembic file.
-                                        Can be single, lod or none.
-                                        Default to lod.
-
-        Returns:
-            item : The new ui item.
-        """
-        publisher = self.parent
-
-        # Create the ui item for the asset.
-        assetItem = parent_item.create_item("maya.asset", "Asset", assetRoot)
-
-        # Get the icon path to display for this item
-        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
-        assetItem.set_icon_from_path(icon_path)
-
-        # Add the asset project root to the item properties.
-        project_root = cmds.workspace(q=True, rootDirectory=True)
-        assetItem.properties["project_root"] = project_root
-
-        # Create the asset object an add it to the item properties.
-        # That allow to share the MayaAsset Class with the publish plugin.
-        mayaAsset = P3Dfw.MayaAsset(assetRoot=assetRoot)
-        assetItem.properties["assetObject"] = mayaAsset
-
-        # if a work template is defined, add it to the item properties so
-        # that it can be used by attached publish plugins
-        work_template_setting = settings.get("Work Template")
-        if(work_template_setting):
-
-            work_template = publisher.engine.get_template_by_name(
-                work_template_setting.value
-            )
-
-            # store the template on the item for use by publish plugins. we
-            # can't evaluate the fields here because there's no guarantee the
-            # current session path won't change once the item has been created.
-            # the attached publish plugins will need to resolve the fields at
-            # execution time.
-            assetItem.properties["work_template"] = work_template
-            self.logger.debug("Work template defined for Maya collection.")
-
-
-        # Create the item ui for the maya export.
-        if(ma == 'lod'):
-            # A Maya file for each LOD.
-            pass
-
-        # Create the item ui for the alembic export.
-        if(abc == 'single'):
-            # A single alembic containing all the asset.
-            self.create_item_alembic(assetItem, assetRoot)
-        elif(abc == 'lod'):
-            # An alembic for each LOD.
-            self.create_item_alembicLOD(assetItem, assetRoot)
-
-
-        return assetItem
-
-    def collect_environment(self, settings, parent_item, environmentRoot):
+    def collect_mayaEnvironment(self, settings, parent_item, environmentRoot, itemName, itemType):
         """ Collect an environment.
 
         Args:
-            settings            (dict)          : Configured settings for this collector.
-            parent_item         ()              : Parent Item instance.
-            environmentRoot     (str)           : The environment root name.
-            ma                  (str, optional) : Set the export type for the maya file.
-                                                Can be single, lod or none.
-                                                Default to single.
-            abc                 (str, optional) : Set the export type for the alembic file.
-                                                Can be single, lod or none.
-                                                Default to lod.
+            settings        (dict)  :    Configured settings for this collector.
+            parent_item     ()      :    Parent Item instance.
+            environmentRoot (str)   :    The environment root name.
 
         Returns:
-            item : The new ui item.
+            item                    : The new ui item.
         """
         publisher = self.parent
 
         # Create the ui item for the environment.
-        environmentItem = parent_item.create_item("maya.environment", "Environment", environmentRoot)
+        environmentItem = parent_item.create_item(itemType, itemName, environmentRoot)
 
         # Get the icon path to display for this item
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
@@ -591,11 +419,141 @@ class MayaSessionCollector(HookBaseClass):
             # execution time.
             environmentItem.properties["work_template"] = work_template
             self.logger.debug("Work template defined for Maya collection.")
-
-        # Return the environment item.
+        
         return environmentItem
 
-    def create_item_maya(self, parent_item, assetRoot):
+    def collect_asset(self, settings, parent_item, assetRoot):
+        """ Collect an asset.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+            assetRoot   (str)               : The asset root name.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        # Create the main item.
+        mainItem = self.collect_mayaAsset(
+            settings,
+            parent_item,
+            assetRoot,
+            "Asset",
+            "maya.asset"
+        )
+
+        # Create the item ui for the alembic export.
+        self.create_item_asset_alembicLOD(mainItem, assetRoot)
+
+        # Return the main asset item.
+        return mainItem
+
+    def collect_sculpt(self, settings, parent_item, sculptRoot):
+        """ Collect an asset.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+            sculptRoot  (str)               : The sculpt root name.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        # Get the publisher.
+        publisher = self.parent
+
+        # Create the ui item for the sculpt.
+        abcIconPath     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        abcAssetItem    = parent_item.create_item("maya.asset.alembicSCULPT", "Alembic Sculpt", "{} Sculpt".format(sculptRoot))
+        abcAssetItem.set_icon_from_path(abcIconPath)
+
+        # Add the asset project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        abcAssetItem.properties["project_root"] = project_root
+
+        # Store the sculpt root in the item properties.
+        abcAssetItem.properties["assetObject"] = sculptRoot
+
+        # If a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins.
+        work_template_setting = settings.get("Work Template")
+        if (work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # Store the template on the item for use by publish plugins. We
+            # can't evaluate the fields here because there's no guarantee the
+            # current session path won't change once the item has been created.
+            # The attached publish plugins will need to resolve the fields at
+            # execution time.
+            abcAssetItem.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+        # Return the main item.
+        return abcAssetItem
+
+    def collect_asset_rig(self, settings, parent_item, assetRoot):
+        """ Collect an for the rig.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+            assetRoot   (str)               : The asset root name.
+            ma          (str,   optional)   : Set the export type for the maya file.
+                                            Can be single, lod or none.
+                                            Default to single.
+            abc         (str,   optional)   : Set the export type for the alembic file.
+                                            Can be single, lod or none.
+                                            Default to lod.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        # Create the main rig item.
+        mainItem = self.collect_mayaAsset(
+            settings,
+            parent_item,
+            assetRoot,
+            "Asset Rig Master",
+            "maya.asset.rigMaster"
+        )
+        # Create the child rig item.
+        self.create_item_asset_rig_maya(mainItem, assetRoot)
+
+        # Create the alembic export.
+        self.create_item_asset_alembicLOD(mainItem, assetRoot)
+
+    def collect_environment(self, settings, parent_item, environmentRoot):
+        """ Collect an environment.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            environmentRoot     (str)   : The environment root name.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # Create the main item.
+        mainItem = self.collect_mayaAsset(
+            settings,
+            parent_item,
+            environmentRoot,
+            "Environment",
+            "maya.environment"
+        )
+
+        # Create the item ui for the alembic export.
+        self.create_item_environment_alembic(mainItem, environmentRoot)
+
+        # Return the environment item.
+        return mainItem
+
+# CREATE ASSET ITEM FUNCTIONS.
+
+    def create_item_asset_maya(self, parent_item, assetRoot):
         """ Create an item to export the asset as maya ascii.
 
         Args:
@@ -612,7 +570,7 @@ class MayaSessionCollector(HookBaseClass):
 
         return maAssetItem
 
-    def create_item_alembic(self, parent_item, assetRoot):
+    def create_item_asset_alembic(self, parent_item, assetRoot):
         """ Create an item to export the asset as alembic.
 
         Args:
@@ -624,12 +582,12 @@ class MayaSessionCollector(HookBaseClass):
         """
         # Create the item ui for the alembic export.
         abcIconPath     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
-        abcAssetItem     = parent_item.create_item("maya.asset.alembic", "Alembic Mesh", "%s Meshes" % assetRoot)
+        abcAssetItem    = parent_item.create_item("maya.asset.alembic", "Alembic Mesh", "%s Meshes" % assetRoot)
         abcAssetItem.set_icon_from_path(abcIconPath)
 
         return abcAssetItem
 
-    def create_item_alembicLOD(self, parent_item, assetRoot):
+    def create_item_asset_alembicLOD(self, parent_item, assetRoot):
         """ Create an item to export the asset LODs as alembic.
 
         Args:
@@ -640,18 +598,173 @@ class MayaSessionCollector(HookBaseClass):
             item : The new ui items.
         """
         # Create the item ui for the alembic export.
-        abcIconPath     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        abcIconPath         = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
 
-        abcAssetLOItem     = parent_item.create_item("maya.asset.alembicLO", "Alembic Low Resolution", "%s Low Meshes" % assetRoot)
+        abcAssetLOItem      = parent_item.create_item("maya.asset.alembicLO", "Alembic Low Resolution", "%s Low Meshes" % assetRoot)
         abcAssetLOItem.set_icon_from_path(abcIconPath)
-        abcAssetMIItem     = parent_item.create_item("maya.asset.alembicMI", "Alembic Middle Resolution", "%s Mid Meshes" % assetRoot)
+        abcAssetMIItem      = parent_item.create_item("maya.asset.alembicMI", "Alembic Middle Resolution", "%s Mid Meshes" % assetRoot)
         abcAssetMIItem.set_icon_from_path(abcIconPath)
-        abcAssetHIItem     = parent_item.create_item("maya.asset.alembicHI", "Alembic High Resolution", "%s High Meshes" % assetRoot)
+        abcAssetHIItem      = parent_item.create_item("maya.asset.alembicHI", "Alembic High Resolution", "%s High Meshes" % assetRoot)
         abcAssetHIItem.set_icon_from_path(abcIconPath)
         # abcAssetTechItem   = parent_item.create_item("maya.asset.alembicTech", "Alembic Technical", "%s Technical Meshes" % assetRoot)
         # abcAssetTechItem.set_icon_from_path(abcIconPath)
 
         return (abcAssetLOItem, abcAssetMIItem, abcAssetHIItem)
+
+# CREATE ASSET RIG ITEM FUNCTIONS.
+
+    def create_item_asset_rig_maya(self, parent_item, assetRoot):
+        """ Create an item to export the asset rig as maya ascii.
+
+        Args:
+            parent_item ():         Parent Item instance.
+            assetRoot   (str):      The asset root name.
+
+        Returns:
+            item : The new ui item.
+        """
+        # Create the item ui for the maya export.
+        mayaIcon = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+
+        rigLoItem = parent_item.create_item("maya.asset.rigLO", "Asset Rig LO", assetRoot)
+        rigLoItem.set_icon_from_path(mayaIcon)
+        rigMiItem = parent_item.create_item("maya.asset.rigMI", "Asset Rig MI", assetRoot)
+        rigMiItem.set_icon_from_path(mayaIcon)
+        rigHiItem = parent_item.create_item("maya.asset.rigHI", "Asset Rig HI", assetRoot)
+        rigHiItem.set_icon_from_path(mayaIcon)
+
+        return parent_item
+
+# CREATE ENVIRONMENT ITEM FUNCTIONS.
+
+    def create_item_environment_alembic(self, parent_item, environmentRoot):
+        """ Create an item to export the environment as alembic.
+
+        Args:
+            parent_item ()      :   Parent Item instance.
+            assetRoot   (str)   :   The asset root name.
+
+        Returns:
+            item                :   The new ui item.
+        """
+        # Create the item ui for the alembic export.
+        abcIconPath     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        envAbcItem      = parent_item.create_item("maya.environment.alembic", "Environment Alembic", environmentRoot)
+        envAbcItem.set_icon_from_path(abcIconPath)
+
+        return envAbcItem
+
+# CREATE REVIEW ITEM FUNCTIONS.
+
+    def collect_review(self, parent_item, context):
+        """
+        Creates items for review.
+
+        :param parent_item: Parent Item instance
+        """
+        print("SGTK | Collector | Collect the session's review.")
+
+
+        # Get the entity root using the context.
+        entityRootLocations = context.entity_locations
+        # Check if a entity root location exists.
+        if(not entityRootLocations):
+            self.logger.debug("No entity root location found.")
+            return
+
+        # Normalize the path.
+        entityRoot = os.path.normpath(entityRootLocations[0])
+        self.logger.debug("Entity root defined for Maya.")
+
+        # Get the path to the review folder.
+        reviewFolder = os.path.join(entityRoot, 'review')
+        # Check if the folder exists.
+        if(not os.path.exists(reviewFolder)):
+            self.logger.debug("No review folder found.")
+            return
+
+        # Get the current scene name.
+        sceneName       = os.path.splitext(cmds.file(query=True, sceneName=True, shortName=True))[0]
+        # Split the scene name and the version number.
+        sceneNameSplit  = sceneName.split('.v')
+
+        # Check if the file name is valide.
+        if(len(sceneNameSplit) != 2):
+            self.logger.warning("Scene name is not valid.")
+            return
+
+        sceneName       = sceneNameSplit[0]
+        sceneversion    = sceneNameSplit[1]
+
+        # Use regex to find the correct file.
+        reExpr = "^({})(|[_].*)([.]v{})$".format(sceneName, sceneversion)
+
+        # Loop over all the files in the review folder.
+        for file in os.listdir(reviewFolder):
+            # Get the info of the item.
+            itemInfo = self._get_item_info(file)
+            # Skip if it is neither a video nor an image.
+            if(itemInfo["item_type"] not in ["file.image", "file.video"]):
+                continue
+
+            # Get the file name without extension.
+            fileName        = os.path.splitext(file)[0]
+
+            # Check if the file name matches the regex.
+            if(re.search(reExpr, fileName)):
+                # create the review item for the publish hierarchy
+                review_item = parent_item.create_item(
+                    "maya.playblast.review", "Review", file
+                )
+
+                # Get the icon path to display for this item.
+                icon_path = os.path.join(self.disk_location, os.pardir, "icons", "review.png")
+                #review_item.set_icon_from_path(icon_path)
+                review_item.set_icon_from_path(itemInfo["icon_path"])
+
+                # Get the path to the file.
+                filePath = os.path.join(reviewFolder, file)
+
+                # Add the path to the item properties
+                review_item.properties["path"] = filePath
+
+                # if the supplied path is an image, use the path as the thumbnail.
+                if(itemInfo["item_type"].startswith("file.image")):
+                    review_item.set_thumbnail_from_path(filePath)
+                    # disable thumbnail creation since we get it for free
+                    review_item.thumbnail_enabled = False
+
+# DEFAULT ITEMS FUNCTIONS.
+
+    def create_item_maya(self, parent_item, transform):
+        """
+        Create an item to publish the transform as maya ascii.
+
+        Args:
+            parent_item     ()      : Parent Item instance.
+            transform       (str)   : The transform to export.
+        
+        Returns:
+            item                    : The new ui item.
+        """
+        # TODO.
+        pass
+
+    def create_item_alembic(self, parent_item, transform):
+        """
+        Create an item to publish the transform as alembic.
+
+        Args:
+            parent_item     ()      : Parent Item instance.
+            transform       (str)   : The transform to export.
+        
+        Returns:
+            item                    : The new ui item.
+        """
+        # TODO.
+        pass
+
+# DEFAULT COLLECT FUNCTIONS.
 
     def collect_current_maya_session(self, settings, parent_item):
         """
@@ -861,81 +974,13 @@ class MayaSessionCollector(HookBaseClass):
                 # the an indication of what it is and why it was collected
                 item.name = "%s (Render Layer: %s)" % (item.name, layer)
 
+# CHECKING FUNCTIONS.
 
-    def collect_review(self, parent_item, context):
+    def check_end_tag(self, object, tag):
         """
-        Creates items for review.
+        Check if the object ends with the tag.
 
-        :param parent_item: Parent Item instance
+        Args:
+            tag (str): The tag to check.
         """
-        print("SGTK | Collector | Collect the session's review.")
-
-
-        # Get the entity root using the context.
-        entityRootLocations = context.entity_locations
-        # Check if a entity root location exists.
-        if(not entityRootLocations):
-            self.logger.debug("No entity root location found.")
-            return
-
-        # Normalize the path.
-        entityRoot = os.path.normpath(entityRootLocations[0])
-        self.logger.debug("Entity root defined for Maya.")
-
-        # Get the path to the review folder.
-        reviewFolder = os.path.join(entityRoot, 'review')
-        # Check if the folder exists.
-        if(not os.path.exists(reviewFolder)):
-            self.logger.debug("No review folder found.")
-            return
-
-        # Get the current scene name.
-        sceneName       = os.path.splitext(cmds.file(query=True, sceneName=True, shortName=True))[0]
-        # Split the scene name and the version number.
-        sceneNameSplit  = sceneName.split('.v')
-
-        # Check if the file name is valide.
-        if(len(sceneNameSplit) != 2):
-            self.logger.warning("Scene name is not valid.")
-            return
-
-        sceneName       = sceneNameSplit[0]
-        sceneversion    = sceneNameSplit[1]
-
-        # Use regex to find the correct file.
-        reExpr = "^({})(|[_].*)([.]v{})$".format(sceneName, sceneversion)
-
-        # Loop over all the files in the review folder.
-        for file in os.listdir(reviewFolder):
-            # Get the info of the item.
-            itemInfo = self._get_item_info(file)
-            # Skip if it is neither a video nor an image.
-            if(itemInfo["item_type"] not in ["file.image", "file.video"]):
-                continue
-
-            # Get the file name without extension.
-            fileName        = os.path.splitext(file)[0]
-
-            # Check if the file name matches the regex.
-            if(re.search(reExpr, fileName)):
-                # create the review item for the publish hierarchy
-                review_item = parent_item.create_item(
-                    "maya.playblast.review", "Review", file
-                )
-
-                # Get the icon path to display for this item.
-                icon_path = os.path.join(self.disk_location, os.pardir, "icons", "review.png")
-                #review_item.set_icon_from_path(icon_path)
-                review_item.set_icon_from_path(itemInfo["icon_path"])
-
-                # Get the path to the file.
-                filePath = os.path.join(reviewFolder, file)
-
-                # Add the path to the item properties
-                review_item.properties["path"] = filePath
-
-                # if the supplied path is an image, use the path as the thumbnail.
-                if(itemInfo["item_type"].startswith("file.image")):
-                    review_item.set_thumbnail_from_path(filePath)
-                    # disable thumbnail creation since we get it for free
-                    review_item.thumbnail_enabled = False
+        return object.endswith('_{}'.format(tag))

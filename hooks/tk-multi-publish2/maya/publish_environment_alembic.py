@@ -94,8 +94,8 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
     @property
     def description(self):
         return """
-        <p>This plugin publish the environment for the rig pipeline step
-        This will find all the root transforms which finished by _ENV.</p>
+        <p>This plugin publish the environment for the rig pipeline step.
+        You need to select root transform of the environment.</p>
         """
 
     @property
