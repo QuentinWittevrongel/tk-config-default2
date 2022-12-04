@@ -111,13 +111,16 @@ settings.tk-multi-loader2.flame:
 
 # houdini
 settings.tk-multi-loader2.houdini:
+  # Hook the tk-houdini-loader2 actions hook.
+  actions_hook: "{config}/tk-multi-loader2/houdini/P3D_houdini_actions.py"
   action_mappings:
-    Alembic Cache: [import]
-    Houdini Scene: [merge]
-    Image: [file_cop]
-    Photoshop Image: [file_cop]
-    Rendered Image: [file_cop]
-    Texture: [file_cop]
+    Alembic Cache   : [importAlembic_sop]
+    Mtlx File       : [importMtlx_rop]
+    Houdini Scene   : [merge]
+    Image           : [file_cop]
+    Photoshop Image : [file_cop]
+    Rendered Image  : [file_cop]
+    Texture         : [file_cop]
   <<: *settings_tk-multi-loader2_defaultEntities
   <<: *settings_tk-multi-loader2_defaultPublishFilter
   <<: *settings_tk-multi-loader2_defaultLocation

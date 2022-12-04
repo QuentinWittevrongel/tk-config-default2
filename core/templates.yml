@@ -302,10 +302,38 @@ alembic_path: &alembic_path
     asset_alembic_publish:
         definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}.v{version}.abc"
 
+    houdini_asset_alembic_cache:
+        definition: '@asset_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    houdini_asset_alembic_publish:
+        definition: '@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    # SEQUENCE TEMPLATES
+
+    houdini_sequence_alembic_cache:
+        definition: '@sequence_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    houdini_sequence_alembic_publish:
+        definition: '@sequence_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
     # SHOT TEMPLATES
 
     shot_alembic_publish:
         definition: "@shot_publish_root/v{version}/{Step}_{Asset}_{instance}.v{version}.abc"
+
+    houdini_shot_alembic_cache:
+        definition: '@shot_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    houdini_shot_alembic_publish:
+        definition: '@shot_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    # RND TEMPLATE
+
+    houdini_rnd_alembic_cache:
+        definition: '@rnd_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+
+    houdini_rnd_alembic_publish:
+        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
 
 #
 # MATERIAL X PATHS
@@ -400,9 +428,6 @@ houdini_path: &houdini_path
     # The location of published houdini files
     houdini_asset_publish:
         definition: '@asset_publish_area_houdini/houdini/{Step}_{Asset}_{name}.v{version}.{houdini_extension}'
-    # Alembic caches
-    houdini_asset_work_alembic_cache:
-        definition: '@asset_work_area_houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Step}_{Asset}_{Asset}_{name}_v{version}.abc'
     # Rendered images
     houdini_asset_render:
         definition: '@asset_work_root/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Step}_{Asset}_{Asset}_{name}_v{version}.{SEQ}.exr'
@@ -431,9 +456,6 @@ houdini_path: &houdini_path
     # The location of published houdini files
     houdini_sequence_publish:
         definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}.v{version}.{houdini_extension}'
-    # Alembic caches
-    houdini_sequence_work_alembic_cache:
-        definition: '@sequence_work_area_houdini/abc/{name}/v{version}/{Step}_{Sequence}_{name}_{houdini.node}_v{version}.abc'
 
     # SHOT TEMPLATES
 
@@ -452,9 +474,6 @@ houdini_path: &houdini_path
     # The location of published houdini files
     houdini_shot_publish:
         definition: '@shot_publish_root/houdini/{Step}_{Shot}_{name}.v{version}.{houdini_extension}'
-    # Alembic caches
-    houdini_shot_work_alembic_cache:
-        definition: '@shot_work_area_houdini/cache/alembic/{name}/{houdini.node}/v{version}/{Step}_{Shot}_{name}_v{version}.abc'
     # Rendered images
     houdini_shot_render:
         definition: '@shot_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
@@ -483,9 +502,6 @@ houdini_path: &houdini_path
     # The location of published houdini files
     houdini_rnd_publish:
         definition: '@rnd_publish_root/houdini/v{version}/{Step}_{CustomEntity03}_{name}.v{version}.{houdini_extension}'
-    # Alembic caches
-    houdini_rnd_work_alembic_cache:
-        definition: '@rnd_work_area_houdini/abc/{name}/v{version}/{Step}_{CustomEntity03}_{name}_{houdini.node}_v{version}.abc'
 
 #
 # NUKE PATHS
