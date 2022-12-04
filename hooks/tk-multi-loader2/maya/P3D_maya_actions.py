@@ -88,7 +88,17 @@ class MayaActions(HookBaseClass):
                     "name"          : "instanceReference",
                     "params"        : None,
                     "caption"       : "Create Instance Reference",
-                    "description"   : "This will add the asset to the scence as standard reference and add it to a name space with asset_instanceNumber."
+                    "description"   : "This will add the file to the scene as standard reference and add it to a namespace with an instance number."
+                }
+            ) 
+
+        if("instanceReferenceWithoutNamespace" in actions):
+            action_instances.append(
+                {
+                    "name"          : "instanceReferenceWithoutNamespace",
+                    "params"        : None,
+                    "caption"       : "Create Instance Reference Without Namespace",
+                    "description"   : "This will add the file to the scene as standard reference without applying a namespace."
                 }
             ) 
 
@@ -98,7 +108,7 @@ class MayaActions(HookBaseClass):
                     "name"          : "replaceSelectedReferencedInstance",
                     "params"        : None,
                     "caption"       : "Replace Selected Instance Reference",
-                    "description"   : "This will add the asset to the scence as standard reference and add it to a name space with asset_instanceNumber."
+                    "description"   : "This will replace the selected reference by the file."
                 }
             ) 
 
@@ -108,7 +118,7 @@ class MayaActions(HookBaseClass):
                     "name"          : "importWithoutNamespace",
                     "params"        : None,
                     "caption"       : "Import without Namespace",
-                    "description"   : "This will add the asset to the scence."
+                    "description"   : "This will add the file to the scence."
                 }
             )       
 
@@ -118,7 +128,7 @@ class MayaActions(HookBaseClass):
                     "name"          : "instanceStandin",
                     "params"        : None,
                     "caption"       : "Create Instance Stand-in",
-                    "description"   : "This will add the asset to the scence as standin and name it with asset_instanceNumber."
+                    "description"   : "This will add the file to the scence as standin and name it with an instance number."
                 }
             )
 
@@ -238,6 +248,9 @@ class MayaActions(HookBaseClass):
         if( name == "instanceReference"):
             self._instanceReference(path, sg_publish_data)
 
+        if( name == "instanceReferenceWithoutNamespace"):
+            self._instanceReferenceWithoutNamespace(path, sg_publish_data)
+
         if( name == "replaceSelectedReferencedInstance"):
             self._replaceSelectedInstanceReference(path, sg_publish_data)
 
@@ -261,22 +274,35 @@ class MayaActions(HookBaseClass):
     # helper methods which can be subclassed in custom hooks to fine tune the behaviour of things
 
     def _replaceSelectedInstanceReference(self, path, sg_publish_data):
-        
-        if not os.path.exists(path):
-            raise Exception("File not found on disk - '%s'" % path)
 
-        loadTools.replaceSelectedAssetsReference(sg_publish_data.get("entity").get("name"), path)
+        loadTools.replaceSelectedAssetsReference(
+            sg_publish_data.get("entity").get("name"),
+            path
+        )
 
     def _instanceReference(self, path, sg_publish_data):
 
-        if not os.path.exists(path):
-            raise Exception("File not found on disk - '%s'" % path)
+        loadTools.importAsReference(
+            sg_publish_data.get("entity").get("name"),
+            path,
+            sg_publish_data
+        )
 
-        loadTools.importAssetAsReference(sg_publish_data.get("entity").get("name"), path, sg_publish_data)
+    def _instanceReferenceWithoutNamespace(self, path, sg_publish_data):
+
+        loadTools.importAsReferenceWithoutNamespace(
+            sg_publish_data.get("entity").get("name"),
+            path,
+            sg_publish_data
+        )
 
     def _importWithoutNamespace(self, path, sg_publish_data):
 
-        loadTools.importAsset(sg_publish_data.get("entity").get("name"), path, sg_publish_data)
+        loadTools.importHard(
+            sg_publish_data.get("entity").get("name"),
+            path,
+            sg_publish_data
+        )
 
     def _create_reference(self, path, sg_publish_data):
         """

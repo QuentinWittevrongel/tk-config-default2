@@ -48,8 +48,8 @@ class MayaEnvironmentScenePublishPlugin(HookBaseClass):
         self.logger.info("Environment Scene Publish | validate")
 
         # Check if the environment is valid.
-        mayaObject = item.properties["assetObject"]
-        if(not cmds.objExists(mayaObject)):
+        mayaObject = item.properties["mayaObject"]
+        if(not cmds.objExists(mayaObject.fullname)):
             error_msg = "The environment {} is not a valid.".format(mayaObject)
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -66,24 +66,12 @@ class MayaEnvironmentScenePublishPlugin(HookBaseClass):
 
         self.logger.info("Environment Publish | publish")
 
-        publisher = self.parent
-
-        # Get the environment.
-        mayaObject = item.properties["assetObject"]
-
-        # get the path to create and publish
-        publish_path = item.properties["path"]
-
-        # ensure the publish folder exists:
-        publish_folder = os.path.dirname(publish_path)
-        self.parent.ensure_folder_exists(publish_folder)
-
-        # Select the asset before save.
-        cmds.select(clear=True)
-        cmds.select(mayaObject)
-
-        # Save the asset.
-        cmds.file(publish_path, force=True, type="mayaAscii", exportSelected=True)
+        publihTools.hookPublishMayaEnvironmentPublish(
+            self,
+            settings,
+            item,
+            isChild=False
+        )
 
         # let the base class register the publish
         super(MayaEnvironmentScenePublishPlugin, self).publish(settings, item)

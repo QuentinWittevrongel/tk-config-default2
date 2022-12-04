@@ -139,6 +139,10 @@ class BeforeAppLaunch(tank.Hook):
                 # Add SideFXLabs.
                 self.addToEnvironmentBegin('HOUDINI_PACKAGE_DIR', 'C:\\Program Files\\Side Effects Software\\sidefx_packages')
         
+            if(projectName == "ADAM"):
+                # Add Adam Houdini packages.
+                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackages')
+
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')
             self.addToEnvironmentBegin('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0')

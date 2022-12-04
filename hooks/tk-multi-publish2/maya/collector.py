@@ -401,7 +401,8 @@ class MayaSessionCollector(HookBaseClass):
         environmentItem.properties["project_root"] = project_root
 
         # Create the environment object an add it to the item properties.
-        environmentItem.properties["assetObject"] = environmentRoot
+        mayaObject = P3Dfw.MayaEnvironment(root=environmentRoot)
+        environmentItem.properties["mayaObject"] = mayaObject
 
         # if a work template is defined, add it to the item properties so
         # that it can be used by attached publish plugins
@@ -537,7 +538,7 @@ class MayaSessionCollector(HookBaseClass):
             item                        : The new ui item.
         """
         # Create the main item.
-        mainItem = self.collect_mayaAsset(
+        mainItem = self.collect_mayaEnvironment(
             settings,
             parent_item,
             environmentRoot,

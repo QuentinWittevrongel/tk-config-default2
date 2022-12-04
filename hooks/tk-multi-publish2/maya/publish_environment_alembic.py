@@ -39,8 +39,8 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
         self.logger.info("Environment Alembic Publish | validate")
 
         # Check if the environment is valid.
-        mayaObject = item.parent.properties["assetObject"]
-        if(not cmds.objExists(mayaObject)):
+        mayaObject = item.parent.properties["mayaObject"]
+        if(not cmds.objExists(mayaObject.fullname)):
             error_msg = "The environment {} is not a valid.".format(mayaObject)
             self.logger.error(error_msg)
             raise Exception(error_msg)
@@ -56,29 +56,13 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
 
         self.logger.info("Environment Publish | publish")
 
-        publisher = self.parent
-
-        # Get the environment.
-        mayaObject = item.properties["assetObject"]
-
-        # get the path to create and publish
-        publish_path = item.properties["path"]
-
-        # ensure the publish folder exists:
-        publish_folder = os.path.dirname(publish_path)
-        self.parent.ensure_folder_exists(publish_folder)
-
-        # Get the MI meshes from the maya asset.
-        meshes = mayaObject
-
-        # Export the alembic.
-        publihTools.exportAlembic(
-            meshes,
-            1,
-            1,
-            publish_path,
-            exportABCVersion=2,
-            spaceType="local")
+        publihTools.hookPublishAlembicEnvironmentPublish(
+            self,
+            settings,
+            item,
+            useFrameRange=True,
+            isChild=True
+        )
 
         # let the base class register the publish
         super(MayaEnvironmentAlembicPublishPlugin, self).publish(settings, item)
