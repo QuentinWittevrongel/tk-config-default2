@@ -57,10 +57,22 @@ settings.tk-multi-snapshot.houdini.asset_step:
   template_work: houdini_asset_work
   location: "@apps.tk-multi-snapshot.location"
 
+# sequence step
+settings.tk-multi-snapshot.houdini.sequence_step:
+  template_snapshot: houdini_sequence_snapshot
+  template_work: houdini_sequence_work
+  location: "@apps.tk-multi-snapshot.location"
+
 # shot step
 settings.tk-multi-snapshot.houdini.shot_step:
   template_snapshot: houdini_shot_snapshot
   template_work: houdini_shot_work
+  location: "@apps.tk-multi-snapshot.location"
+
+# rnd step
+settings.tk-multi-snapshot.houdini.rnd_step:
+  template_snapshot: houdini_rnd_snapshot
+  template_work: houdini_rnd_work
   location: "@apps.tk-multi-snapshot.location"
 
 ################################################################################
@@ -73,10 +85,22 @@ settings.tk-multi-snapshot.maya.asset_step:
   template_work: maya_asset_work
   location: "@apps.tk-multi-snapshot.location"
 
+# sequence step
+settings.tk-multi-snapshot.maya.sequence_step:
+  template_snapshot: maya_sequence_snapshot
+  template_work: maya_sequence_work
+  location: "@apps.tk-multi-snapshot.location"
+
 # shot step
 settings.tk-multi-snapshot.maya.shot_step:
   template_snapshot: maya_shot_snapshot
   template_work: maya_shot_work
+  location: "@apps.tk-multi-snapshot.location"
+
+# rnd step
+settings.tk-multi-snapshot.maya.rnd_step:
+  template_snapshot: maya_rnd_snapshot
+  template_work: maya_rnd_work
   location: "@apps.tk-multi-snapshot.location"
 
 ################################################################################
@@ -89,10 +113,22 @@ settings.tk-multi-snapshot.nuke.asset_step:
   template_work: nuke_asset_work
   location: "@apps.tk-multi-snapshot.location"
 
+# sequence step
+settings.tk-multi-snapshot.nuke.sequence_step:
+  template_snapshot: nuke_sequence_snapshot
+  template_work: nuke_sequence_work
+  location: "@apps.tk-multi-snapshot.location"
+
 # shot step
 settings.tk-multi-snapshot.nuke.shot_step:
   template_snapshot: nuke_shot_snapshot
   template_work: nuke_shot_work
+  location: "@apps.tk-multi-snapshot.location"
+
+# rnd step
+settings.tk-multi-snapshot.nuke.rnd_step:
+  template_snapshot: nuke_rnd_snapshot
+  template_work: nuke_rnd_work
   location: "@apps.tk-multi-snapshot.location"
 
 ################################################################################
@@ -144,6 +180,8 @@ settings.tk-multi-snapshot.motionbuilder.shot_step:
   template_snapshot: mobu_shot_snapshot
   template_work: mobu_shot_work
   location: "@apps.tk-multi-snapshot.location"
+
+################################################################################
 
 # ---- Substance Painter
 

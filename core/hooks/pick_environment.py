@@ -21,36 +21,50 @@ class PickEnvironment(Hook):
         The default implementation assumes there are three environments, called shot, asset
         and project, and switches to these based on entity type.
         """
-        if context.source_entity:
-            if context.source_entity["type"] == "Version":
+        if (context.source_entity):
+            if (context.source_entity["type"] == "Version"):
                 return "version"
-            elif context.source_entity["type"] == "PublishedFile":
+            elif (context.source_entity["type"] == "PublishedFile"):
                 return "publishedfile"
-            elif context.source_entity["type"] == "Playlist":
+            elif (context.source_entity["type"] == "Playlist"):
                 return "playlist"
 
-        if context.project is None:
+        if (context.project is None):
             # Our context is completely empty. We're going into the site context.
             return "site"
 
-        if context.entity is None:
+        if (context.entity is None):
             # We have a project but not an entity.
             return "project"
 
-        if context.entity and context.step is None:
+        if (context.entity and context.step is None):
             # We have an entity but no step.
-            if context.entity["type"] == "Shot":
-                return "shot"
-            if context.entity["type"] == "Asset":
+            if (context.entity["type"] == "Asset"):
                 return "asset"
-            if context.entity["type"] == "Sequence":
+            if (context.entity["type"] == "Sequence"):
                 return "sequence"
+            if (context.entity["type"] == "Shot"):
+                return "shot"
+            if (context.entity["type"] == "CustomEntity03"):
+                # Custom entity Research And Development
+                return "rnd"
+            if (context.entity["type"] == "CustomEntity04"):
+                # Custom entity Editing
+                return "editing"
 
-        if context.entity and context.step:
+        if (context.entity and context.step):
             # We have a step and an entity.
-            if context.entity["type"] == "Shot":
-                return "shot_step"
-            if context.entity["type"] == "Asset":
+            if (context.entity["type"] == "Asset"):
                 return "asset_step"
+            if (context.entity["type"] == "Sequence"):
+                return "sequence_step"
+            if (context.entity["type"] == "Shot"):
+                return "shot_step"
+            if (context.entity["type"] == "CustomEntity03"):
+                # Custom entity Research And Development
+                return "rnd_step"
+            if (context.entity["type"] == "CustomEntity04"):
+                # Custom entity Editing
+                return "editing_step"
 
         return None

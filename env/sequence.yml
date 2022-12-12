@@ -25,6 +25,7 @@ includes:
 - ./includes/settings/tk-houdini.yml
 - ./includes/settings/tk-maya.yml
 - ./includes/settings/tk-nuke.yml
+- ./includes/settings/tk-photoshopcc.yml
 - ./includes/settings/tk-shell.yml
 - ./includes/settings/tk-shotgun.yml
 
@@ -35,6 +36,7 @@ engines:
   tk-houdini: "@settings.tk-houdini.sequence"
   tk-maya: "@settings.tk-maya.sequence"
   tk-nuke: "@settings.tk-nuke.sequence"
+  tk-photoshopcc: "@settings.tk-photoshopcc.sequence"
   tk-shell: "@settings.tk-shell.sequence"
   tk-shotgun: "@settings.tk-shotgun.sequence"
 

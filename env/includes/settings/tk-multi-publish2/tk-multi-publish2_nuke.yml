@@ -1,0 +1,116 @@
+includes:
+- ../../app_locations.yml
+
+# ---- Nuke
+
+# ASSET STEP
+settings.tk-multi-publish2.nuke.asset_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: nuke_asset_work
+
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/nuke_publish_script.py"
+    settings:
+        Publish Template: nuke_asset_publish
+  - name: Submit for Review
+    hook: "{engine}/tk-multi-publish2/basic/submit_for_review.py"
+    settings: {}
+  
+  location: "@apps.tk-multi-publish2.location"
+
+# SEQUENCE STEP
+settings.tk-multi-publish2.nuke.sequence_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+  
+  collector_settings:
+      Work Template: nuke_sequence_work
+
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/nuke_publish_script.py"
+    settings:
+        Publish Template: nuke_sequence_publish
+  - name: Submit for Review
+    hook: "{engine}/tk-multi-publish2/basic/submit_for_review.py"
+    settings: {}
+  
+  location: "@apps.tk-multi-publish2.location"
+
+# SHOT STEP
+settings.tk-multi-publish2.nuke.shot_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: nuke_shot_work
+
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/nuke_publish_script.py"
+    settings:
+        Publish Template: nuke_shot_publish
+  - name: Submit for Review
+    hook: "{engine}/tk-multi-publish2/basic/submit_for_review.py"
+    settings: {}
+  - name: Update Flame Clip
+    hook: "{engine}/tk-multi-publish2/basic/nuke_update_flame_clip.py"
+    settings:
+        Flame Clip Template: flame_shot_clip
+  
+  location: "@apps.tk-multi-publish2.location"
+
+# RND STEP
+settings.tk-multi-publish2.nuke.rnd_step:
+  collector: "{self}/collector.py:{engine}/tk-multi-publish2/basic/collector.py"
+
+  collector_settings:
+      Work Template: nuke_rnd_work
+
+  publish_plugins:
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py"
+    settings: {}
+  - name: Upload for review
+    hook: "{self}/upload_version.py"
+    settings: {}
+  - name: Begin file versioning
+    hook: "{engine}/tk-multi-publish2/basic/nuke_start_version_control.py"
+    settings: {}
+  - name: Publish to ShotGrid
+    hook: "{self}/publish_file.py:{engine}/tk-multi-publish2/basic/nuke_publish_script.py"
+    settings:
+        Publish Template: nuke_rnd_publish
+  - name: Submit for Review
+    hook: "{engine}/tk-multi-publish2/basic/submit_for_review.py"
+    settings: {}
+
+  location: "@apps.tk-multi-publish2.location"

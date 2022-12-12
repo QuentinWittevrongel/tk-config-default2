@@ -41,7 +41,7 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
             item,
             self.propertiesPublishTemplate,
             isChild=True,
-            addFields={"lod":"MI"}
+            addFields={"lod":"mid"}
         )
 
         # run the base class validation
@@ -50,7 +50,7 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
 
     def publish(self, settings, item):
 
-        publihTools.hookPublishMayaSceneLODPublish(
+        publihTools.hookPublishMayaRigLODPublish(
             self,
             settings,
             item,

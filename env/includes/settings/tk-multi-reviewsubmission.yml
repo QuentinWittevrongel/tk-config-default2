@@ -23,9 +23,21 @@ settings.tk-multi-reviewsubmission.nuke.asset:
   slate_logo: icons/review_submit_logo.png
   location: "@apps.tk-multi-reviewsubmission.location"
 
+# sequence
+settings.tk-multi-reviewsubmission.nuke.sequence:
+  movie_path_template: nuke_sequence_render_movie
+  slate_logo: icons/review_submit_logo.png
+  location: "@apps.tk-multi-reviewsubmission.location"
+
 # shot
 settings.tk-multi-reviewsubmission.nuke.shot:
   movie_path_template: nuke_shot_render_movie
+  slate_logo: icons/review_submit_logo.png
+  location: "@apps.tk-multi-reviewsubmission.location"
+
+# rnd
+settings.tk-multi-reviewsubmission.nuke.rnd:
+  movie_path_template: nuke_rnd_render_movie
   slate_logo: icons/review_submit_logo.png
   location: "@apps.tk-multi-reviewsubmission.location"
 

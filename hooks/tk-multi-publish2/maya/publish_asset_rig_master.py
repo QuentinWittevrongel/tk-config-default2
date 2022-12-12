@@ -47,7 +47,7 @@ class MayaAssetRigMasterPublishPlugin(HookBaseClass):
 
     def publish(self, settings, item):
 
-        publihTools.hookPublishMayaScenePublish(
+        publihTools.hookPublishMayaRigPublish(
             self,
             settings,
             item
