@@ -399,11 +399,11 @@ substance_painter_path: &substance_painter_path
         root_name: 'primary'
     # a texture folder publish
     substancepainter_asset_textures_path_publish:
-        definition: '@asset_publish_root/v{version}'
+        definition: '@asset_publish_root/v{version}/painter'
         root_name: 'primary'
     # a texture folder publish
     substancepainter_asset_texture_path_publish:
-        definition: '@asset_publish_root/v{version}/{Asset}_{texture_name}.v{version}.{texture_extension}'
+        definition: '@asset_publish_root/v{version}/painter/{Step}_{Asset}_{texture_name}.v{version}.{texture_extension}'
         root_name: 'primary'
 
 #
