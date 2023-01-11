@@ -14,6 +14,7 @@ from tank_vendor import six
 # Import the maya module of the P3D framework.
 P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("maya")
 publihTools = P3Dfw.PublishTools()
+# technicalcheck = P3Dfw.TechnicalCheck()
 
 # Inherit from {self}/publish_file.py 
 # Check config.env.includes.settings.tk-multi-publish2.yml
@@ -43,6 +44,14 @@ class MayaAssetRigLOPublishPlugin(HookBaseClass):
             isChild=True,
             addFields={"lod":"low"}
         )
+
+        # # Validate the asset.
+        # asset = item.parent.properties["assetObject"]
+        # assetValidation = technicalcheck.validateAsset(self, asset)
+        # if(not assetValidation):
+        #     errorMsg = "Asset validation failed for {}".format(asset.fullname)
+        #     self.logger.error(errorMsg)
+        #     raise Exception(errorMsg)
 
         # run the base class validation
         return super(MayaAssetRigLOPublishPlugin, self).validate(settings, item)

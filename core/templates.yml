@@ -242,13 +242,13 @@ maya_path: &maya_path
         definition: '@sequence_publish_root/maya'
     # The location of WIP files
     maya_sequence_work:
-        definition: '@sequence_work_area_maya/scenes/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+        definition: '@sequence_work_area_maya/scenes/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_sequence_snapshot:
-        definition: '@sequence_work_area_maya/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
+        definition: '@sequence_work_area_maya/snapshots/{Step}_{Sequence}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_sequence_publish:
-        definition: '@sequence_publish_root/v{version}/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+        definition: '@sequence_publish_root/v{version}/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
 
     # SHOT TEMPLATES
 
@@ -260,13 +260,13 @@ maya_path: &maya_path
         definition: '@shot_publish_root/maya'
     # The location of WIP files
     maya_shot_work:
-        definition: '@shot_work_area_maya/scenes/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
+        definition: '@shot_work_area_maya/scenes/{Step}_{Sequence}_{Shot}_{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_shot_snapshot:
-        definition: '@shot_work_area_maya/snapshots/{Step}_{Sequence}_{name}.v{version}.{timestamp}.{maya_extension}'
+        definition: '@shot_work_area_maya/snapshots/{Step}_{Sequence}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_shot_publish:
-        definition: '@shot_publish_root/v{version}/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
+        definition: '@shot_publish_root/v{version}/{Step}_{Sequence}_{Shot}_{name}.v{version}.{maya_extension}'
 
     # RND TEMPLATES
 
@@ -329,11 +329,14 @@ alembic_path: &alembic_path
 
     # RND TEMPLATE
 
+    rnd_alembic_publish:
+        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{CustomEntity03}_{name}.v{version}.abc'
+
     houdini_rnd_alembic_cache:
-        definition: '@rnd_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@rnd_work_area_houdini/abc/v{version}/{Step}_{CustomEntity03}_{name}_{houdini.node}.v{version}.abc'
 
     houdini_rnd_alembic_publish:
-        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{CustomEntity03}_{name}_{houdini.node}.v{version}.abc'
 
 #
 # MATERIAL X PATHS
@@ -375,11 +378,11 @@ substance_painter_path: &substance_painter_path
 
     # define the location of a work area
     asset_work_area_substancepainter:
-        definition: '@asset_work_root/substancepainter'
+        definition: '@asset_work_root/painter'
         root_name: 'primary'
     # define the location of a publish area
     asset_publish_area_substancepainter:
-        definition: '@asset_publish_root/substancepainter'
+        definition: '@asset_publish_root/painter'
         root_name: 'primary'
     # The location of WIP files
     substancepainter_asset_work:
@@ -628,6 +631,19 @@ nuke_path: &nuke_path
     rnd_quicktime_quick:
         definition: '@rnd_root/review/quickdaily/{Step}_{CustomEntity03}_{name}_{iteration}.mov'
 
+#
+# CAMERA PATHS
+#
+camera_path: &camera_path
+
+    # SEQUENCE TEMPLATES.
+
+    sequence_camera_alembic_publish:
+        definition: '@sequence_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}.v{version}.abc'
+
+    sequence_camera_ma_publish:
+        definition: '@sequence_publish_root/v{version}/maya/{Step}_{Sequence}_{Shot}.v{version}.ma'
+
 paths:
 
     # Common  path definitions to use as shorthand in order to avoid repetitive and verbose
@@ -669,6 +685,7 @@ paths:
     <<: *substance_painter_path
     <<: *houdini_path
     <<: *nuke_path
+    <<: *camera_path
 
     ##########################################################################################
     # Project level paths

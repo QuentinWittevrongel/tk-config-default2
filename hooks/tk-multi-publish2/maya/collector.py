@@ -8,12 +8,14 @@
 # agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
-import glob
-import os
-import re
-import maya.cmds as cmds
-import maya.mel as mel
-import sgtk
+import  glob
+import  os
+import  re
+from    maya                import  cmds, utils
+import  maya.mel            as      mel
+import  sgtk
+import  tempfile
+from    sgtk.platform.qt    import  QtCore, QtGui
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -115,6 +117,17 @@ class MayaSessionCollector(HookBaseClass):
             elif(ctxtStep["name"] == "Shading"):
                 self.collect_for_shd_publish(settings, parent_item)
 
+        elif(ctxtEntity["type"] == "Sequence"):
+
+            # Create an item representing the scene.
+            sceneItem = self.collect_scene(settings, parent_item)
+
+            # Sequence :
+            # - Export cameras.
+
+            if(ctxtStep["name"] == "Set Dress (Seq)"):
+                self.collect_for_sequence_setDress_publish(settings, sceneItem)
+
         elif(ctxtEntity["type"] == "Shot"):
 
             # Shot :
@@ -130,6 +143,12 @@ class MayaSessionCollector(HookBaseClass):
             if(ctxtStep["name"] == "Animation"):
                 self.collect_for_shot_animation_publish(settings, parent_item)
 
+        elif(ctxtEntity["type"] == "CustomEntity03"):
+
+            # Create an item representing the scene.
+            sceneItem = self.collect_scene(settings, parent_item)
+
+            self.collect_selection(settings, sceneItem)
 
         else:
 
@@ -326,7 +345,72 @@ class MayaSessionCollector(HookBaseClass):
                     item.properties["work_template"] = work_template
                     self.logger.debug("Work template defined for Maya collection.")
 
+    def collect_for_sequence_setDress_publish(self, settings, parent_item):
+        ''' Create the items to publish the set dressing.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        publisher = self.parent
+
+        # Get the selection.
+        mSelection = cmds.ls(sl=True, long=True, type="transform")
+
+        # Loop over the selection and check the end tag.
+        for transform in mSelection:
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'CAMBUF')):
+                # Create the publish item.
+                self.collect_camera(settings, parent_item, transform)
+
+            else:
+                # Create a default publish item.
+                pass
+
 # COLLECT BY ELEMENT FUNCTIONS.
+
+    def collect_scene(self, settings, parent_item):
+        ''' Create an item representing the scene.
+
+        Args:
+            setting     (dict)  : Configured settings for this collector.
+            parent_item ()      : Parent Item instance.
+
+        Returns:
+            item                : The new ui item.
+        '''
+        publisher = self.parent
+
+        # Get the file name.
+        fileName = cmds.file(q=True, sn=True)
+
+        # Create the item.
+        item = parent_item.create_item("maya.workscene", "Maya Scene", fileName)
+
+        # Get the icon path to display for this item
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        item.set_icon_from_path(icon_path)
+
+        # Add the project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        item.properties["project_root"] = project_root
+
+        # If a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins.
+        work_template_setting = settings.get("Work Template")
+        if(work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # Store the template on the item for use by publish plugins.
+            item.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+        # Returns the item.
+        return item
 
     def collect_mayaAsset(self, settings, parent_item, assetRoot, itemName, itemType):
         """ Collect an asset.
@@ -552,6 +636,163 @@ class MayaSessionCollector(HookBaseClass):
         # Return the environment item.
         return mainItem
 
+    def collect_camera(self, settings, parent_item, cameraRoot):
+        """ Collect a camera.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+            cameraRoot  (str)               : The camera root name.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        publisher = self.parent
+
+        # Create an item for the camera.
+        cameraItem = parent_item.create_item('maya.camera', 'Camera', cameraRoot)
+
+        # Get the icon path to display for this item.
+        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "camera.png")
+        cameraItem.set_icon_from_path(iconPath)
+
+        # Add the camera root to the item properties.
+        cameraItem.properties["cameraRoot"] = cameraRoot
+
+        # Add the project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        cameraItem.properties["project_root"] = project_root
+
+        # If a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins.
+        work_template_setting = settings.get("Work Template")
+        if(work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # Store the template on the item for use by publish plugins.
+            cameraItem.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+
+        # Get the camera shapes in the depedencies.
+        cameraShapes = cmds.listRelatives(cameraRoot, allDescendents=True, type="camera", fullPath=True)
+        self.logger.debug(cameraShapes)
+        if(cameraShapes):
+            camera = cameraShapes[0]
+            cameraName = cameraRoot.split("|")[-1]
+
+            # Get the temporary directory.
+            tempDir = tempfile.gettempdir()
+            # Get the temporary file.
+            temporaryFilePath = os.path.join(tempDir, 'screenCapture_{}'.format(cameraName))
+
+            # Get the current viewport.
+            viewport = cmds.playblast(activeEditor=True).split('|')[-1]
+
+            # Get the current camera of the viewport.
+            currentCamera = cmds.modelPanel(viewport, query=True, camera=True)
+
+            # Set the camera.
+            cmds.modelPanel(viewport, edit=True, camera=camera)
+
+            # Playblast the camera at the temporary file location.
+            utils.executeInMainThreadWithResult(
+                lambda : 
+                cmds.playblast(
+                    viewer          = False,
+                    format          = "image",
+                    filename        = temporaryFilePath,
+                    clearCache      = True,
+                    showOrnaments   = False,
+                    percent         = 100,
+                    compression     = "png",
+                    quality         = 100,
+                    widthHeight     = [512, 512],
+                    offScreen       = True,
+                    startTime       = 1001,
+                    endTime         = 1001,
+                    forceOverwrite  = True,
+                    editorPanelName = viewport
+                )
+            )
+            # Get the playblast file.
+            playBlastFile = temporaryFilePath + '.1001.png'
+
+            # Set the camera back to the original camera.
+            cmds.modelPanel(viewport, edit=True, camera=currentCamera)
+
+            # Set the thumbnail path.
+            cameraItem.set_thumbnail_from_path(playBlastFile)
+
+            # Add the playblast file to the item properties.
+            cameraItem.properties["playBlastFile"] = playBlastFile
+
+
+
+        # Create the item for the maya ascii export.
+        self.create_item_camera_maya(cameraItem, cameraRoot)
+
+        # Create the item for the alembic export.
+        self.create_item_camera_alembic(cameraItem, cameraRoot)
+
+        # Return the camera item.
+        return cameraItem
+
+    def collect_selection(self, settings, parent_item):
+        """ Collect a selection.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        publisher = self.parent
+
+        selection = cmds.ls(selection=True, long=True)
+        if(not selection):
+            return None
+
+        # Create an item.
+        item = parent_item.create_item('maya.selection', 'Selection', selection[0])
+
+        # Get the icon path to display for this item.
+        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "geometry.png")
+        item.set_icon_from_path(iconPath)
+
+        # Add the selection to the item properties.
+        item.properties["selection"] = selection
+
+        # Add the project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        item.properties["project_root"] = project_root
+
+        # If a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins.
+        work_template_setting = settings.get("Work Template")
+        if(work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # Store the template on the item for use by publish plugins.
+            item.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+        # Create the item for the maya ascii export.
+        self.create_item_selection_maya(item, selection[0])
+
+        # Create the item for the alembic export.
+        self.create_item_selection_alembic(item, selection[0])
+
+        # Return the item.
+        return item
+
 # CREATE ASSET ITEM FUNCTIONS.
 
     def create_item_asset_maya(self, parent_item, assetRoot):
@@ -565,7 +806,7 @@ class MayaSessionCollector(HookBaseClass):
             item : The new ui item.
         """
         # Create the item ui for the maya export.
-        mayaIconPath = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        mayaIconPath    = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
         maAssetItem     = parent_item.create_item("maya.asset", "Maya Asset", assetRoot)
         maAssetItem.set_icon_from_path(mayaIconPath)
 
@@ -654,6 +895,74 @@ class MayaSessionCollector(HookBaseClass):
         envAbcItem.set_icon_from_path(abcIconPath)
 
         return envAbcItem
+
+# CREATE CAMERA ITEM FUNCTIONS.
+
+    def create_item_camera_maya(self, parent_item, cameraRoot):
+        """ Create an item to export the camera as maya ascii.
+
+        Args:
+            parent_item (sgItemUI)  :   Parent Item instance.
+            assetRoot   (str)       :   The asset root name.
+
+        Returns:
+            item                    : The new ui item.
+        """
+        item    = parent_item.create_item("maya.camera.ma", "Maya Camera", cameraRoot)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        item.set_icon_from_path(icon)
+
+        return item
+
+    def create_item_camera_alembic(self, parent_item, cameraRoot):
+        """ Create an item to export the camera as alembic.
+
+        Args:
+            parent_item (sgItemUI)  :   Parent Item instance.
+            assetRoot   (str)       :   The asset root name.
+
+        Returns:
+            item                    : The new ui item.
+        """
+        item    = parent_item.create_item("maya.camera.abc", "Alembic Camera", cameraRoot)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        item.set_icon_from_path(icon)
+
+        return item
+
+# CREATE SELECTION ITEM FUNCTIONS.
+
+    def create_item_selection_maya(self, parent_item, selectionRoot):
+        """ Create an item to export the selection as maya ascii.
+
+        Args:
+            parent_item (sgItemUI)  :   Parent Item instance.
+            assetRoot   (str)       :   The asset root name.
+
+        Returns:
+            item                    : The new ui item.
+        """
+        item    = parent_item.create_item("maya.selection.ma", "Maya Selection", selectionRoot)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        item.set_icon_from_path(icon)
+
+        return item
+
+    def create_item_selection_alembic(self, parent_item, selectionRoot):
+        """ Create an item to export the selection as alembic.
+
+        Args:
+            parent_item (sgItemUI)  :   Parent Item instance.
+            assetRoot   (str)       :   The asset root name.
+
+        Returns:
+            item                    : The new ui item.
+        """
+        item    = parent_item.create_item("maya.selection.abc", "Alembic Selection", selectionRoot)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        item.set_icon_from_path(icon)
+
+        return item
 
 # CREATE REVIEW ITEM FUNCTIONS.
 

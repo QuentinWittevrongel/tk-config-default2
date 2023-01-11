@@ -119,9 +119,11 @@ class BeforeAppLaunch(tank.Hook):
                     # Add Adam scripts.
                     self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\maya\\scripts")
                     # Add Adam rig nodes.
-                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes-0.1.3\\module")
+                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes-0.1.4\\module")
                     # Add Alembic 2.0.
                     self.addToEnvironmentEnd("MAYA_PLUG_IN_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\alembic\\2.0\\maya2023\\plug-ins")
+                    # Add the picker.
+                    self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\productionPackages\\picker-0.0.0")
 
             else:
                 pass

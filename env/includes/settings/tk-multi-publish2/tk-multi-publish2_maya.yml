@@ -106,6 +106,14 @@ settings.tk-multi-publish2.maya.sequence_step:
   - name: Upload for review
     hook: "{self}/upload_version.py"
     settings: {}
+  - name: Publish Camera Maya
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_camera_maya.py"
+    settings:
+        Camera Maya Publish Template: sequence_camera_ma_publish
+  - name: Publish Camera Alembic
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_camera_alembic.py"
+    settings:
+        Camera Alembic Publish Template: sequence_camera_alembic_publish
 
   location: "@apps.tk-multi-publish2.location"
 
@@ -144,5 +152,13 @@ settings.tk-multi-publish2.maya.rnd_step:
   - name: Upload for review
     hook: "{self}/upload_version.py"
     settings: {}
+  - name: Publish Selection
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_selection_maya.py"
+    settings:
+        Selection Maya Publish Template: maya_rnd_publish
+  - name: Publish Selection
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_selection_alembic.py"
+    settings:
+        Selection Alembic Publish Template: rnd_alembic_publish
 
   location: "@apps.tk-multi-publish2.location"
