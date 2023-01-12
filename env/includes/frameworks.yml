@@ -92,6 +92,6 @@ frameworks:
   tk-framework-P3D_v0.x.x:
     location:
       type: git_branch
-      path: https://github.com/BaratteG/tk-framework-P3D.git
+      path: https://github.com/QuentinWittevrongel/tk-framework-P3D
       branch: master
-      version: v0.0.1
+      version: d64703a
