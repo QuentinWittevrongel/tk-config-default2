@@ -35,12 +35,11 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidate(
+        publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
-            isChild=True,
             addFields={"lod":"mid"}
         )
 
@@ -54,8 +53,7 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
             self,
             settings,
             item,
-            "MI",
-            isChild=True
+            "MI"
         )
 
         # let the base class register the publish
@@ -99,4 +97,4 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.rigMI"]
+        return ["maya.asset.rig.mid.ma"]

@@ -112,6 +112,11 @@ class HoudiniSessionCollector(HookBaseClass):
                 # Use the generic collector.
                 self.generic_collector(settings, parent_item)
 
+        elif(ctxtEntity["type"] == "Sequence"):
+
+            # Use the generic collector.
+            self.generic_collector(settings, parent_item)
+
         elif(ctxtEntity["type"] == "Shot"):
 
             # Use the generic sollector.

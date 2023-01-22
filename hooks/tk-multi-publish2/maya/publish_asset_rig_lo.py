@@ -36,22 +36,13 @@ class MayaAssetRigLOPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidate(
+        publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
-            isChild=True,
             addFields={"lod":"low"}
         )
-
-        # # Validate the asset.
-        # asset = item.parent.properties["assetObject"]
-        # assetValidation = technicalcheck.validateAsset(self, asset)
-        # if(not assetValidation):
-        #     errorMsg = "Asset validation failed for {}".format(asset.fullname)
-        #     self.logger.error(errorMsg)
-        #     raise Exception(errorMsg)
 
         # run the base class validation
         return super(MayaAssetRigLOPublishPlugin, self).validate(settings, item)
@@ -63,8 +54,7 @@ class MayaAssetRigLOPublishPlugin(HookBaseClass):
             self,
             settings,
             item,
-            "LO",
-            isChild=True
+            "LO"
         )
 
         # let the base class register the publish
@@ -108,4 +98,4 @@ class MayaAssetRigLOPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.rigLO"]
+        return ["maya.asset.rig.low.ma"]

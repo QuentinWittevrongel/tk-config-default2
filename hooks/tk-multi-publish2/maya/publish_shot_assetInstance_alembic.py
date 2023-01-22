@@ -30,16 +30,22 @@ class MayaShotAssetInstanceAlembicPublishPlugin(HookBaseClass):
             item,
             self.publishTemplate,
             self.propertiesPublishTemplate,
+            isChild=True
         )
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidate(
+        mayaObject = publihTools.getItemProperty(item, "mayaObject")
+
+        publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
-            addFields={"Asset":item.properties["assetName"], "instance":"%03d" % item.properties["assetInstance"]}
+            addFields={
+                "Asset"     : mayaObject.name,
+                "instance"  : "{:03d}".format(mayaObject.instance)
+            }
         )
 
         # run the base class validation
@@ -48,10 +54,11 @@ class MayaShotAssetInstanceAlembicPublishPlugin(HookBaseClass):
 
     def publish(self, settings, item):
 
-        publihTools.hookAlembicLODPublish(
+        publihTools.hookPublishAlembicAnimationPublish(
             self,
+            settings,
             item,
-            "HI"
+            useFrameRange   = True
         )
 
         # let the base class register the publish
@@ -59,11 +66,11 @@ class MayaShotAssetInstanceAlembicPublishPlugin(HookBaseClass):
 
     @property
     def publishTemplate(self):
-        return "Shot AssetInstance Alembic Publish Template"
+        return "Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "shot_assetInstance_alembic_publish_template"
+        return "publish_template"
 
     @property
     def description(self):
@@ -95,4 +102,4 @@ class MayaShotAssetInstanceAlembicPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.shot.assetInstance.alembic"]
+        return ["maya.shot.assetInstance.abc"]

@@ -20,3 +20,8 @@ includes:
 settings.tk-multi-setframerange.3dsmax:
   hook_frame_operation: "{engine}/tk-multi-setframerange/basic/frame_operations.py"
   location: "@apps.tk-multi-setframerange.location"
+
+# Maya
+settings.tk-multi-setframerange.maya:
+  hook_frame_operation: "{config}/tk-multi-setframerange/maya/P3D_maya_actions.py"
+  location: "@apps.tk-multi-setframerange.location"

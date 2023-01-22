@@ -103,6 +103,8 @@ class MayaSessionCollector(HookBaseClass):
             # Collect all the playblasts for review.
             self.collect_review(parent_item, currentContext)
 
+
+
             # Set the P3D publish pipeline.
             if(ctxtStep["name"] == "Model" or
                 ctxtStep["name"] == "UV"):
@@ -110,9 +112,14 @@ class MayaSessionCollector(HookBaseClass):
                 self.collect_for_model_publish(settings, parent_item)
 
             elif(ctxtStep["name"] == "Rig"):
-                self.collect_for_rig_publish(settings, parent_item)
+                # Create an item representing the scene.
+                sceneItem = self.collect_scene(settings, parent_item)
 
-                self.collect_for_env_publish(settings, parent_item)
+                if(ctxtTask["name"] == "Scene Description"):
+                    self.collect_for_env_publish(settings, sceneItem)
+                
+                else:
+                    self.collect_for_rig_publish(settings, sceneItem)
 
             elif(ctxtStep["name"] == "Shading"):
                 self.collect_for_shd_publish(settings, parent_item)
@@ -140,8 +147,11 @@ class MayaSessionCollector(HookBaseClass):
             # - Export characters.
             #   - Export ABC by resolution.
 
+            # Create an item representing the scene.
+            sceneItem = self.collect_scene(settings, parent_item)
+
             if(ctxtStep["name"] == "Animation"):
-                self.collect_for_shot_animation_publish(settings, parent_item)
+                self.collect_for_shot_animation_publish(settings, sceneItem)
 
         elif(ctxtEntity["type"] == "CustomEntity03"):
 
@@ -236,10 +246,6 @@ class MayaSessionCollector(HookBaseClass):
                 # Create the asset publish item.
                 self.collect_asset_rig(settings, parent_item, transform)
 
-            else:
-                # Create a default publish item.
-                pass
-
     def collect_for_shd_publish(self, settings, parent_item):
         ''' Create an item represents the current selected asset shd.
 
@@ -291,10 +297,6 @@ class MayaSessionCollector(HookBaseClass):
                 # Create the asset publish item.
                 self.collect_environment(settings, parent_item, transform)
 
-            else:
-                # Create a default publish item.
-                pass
-
     def collect_for_shot_animation_publish(self, settings, parent_item):
         ''' Create the items to publish animation alembic.
 
@@ -307,43 +309,19 @@ class MayaSessionCollector(HookBaseClass):
         # Get the current maya selection.
         mSelection = cmds.ls(sl=True, type="transform")
 
-        # Check if the current selection is not empty.
-        if(len(mSelection) > 0):
+        # Loop over the selection and check the end tag.
+        for transform in mSelection:
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'ENV')):
+                self.collect_animation_environment(settings, parent_item, transform)
+            
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'RIG')):
+                self.collect_animation_asset(settings, parent_item, transform)
 
-            # Create an item for each selected asset.
-            for sel in mSelection:
-                asset = P3Dfw.MayaAsset(assetRoot=sel)
-
-                item        = parent_item.create_item("maya.shot.assetInstance.alembic", "Shot Asset Instance Alembic", asset.fullname)
-                abcIcon     = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
-                item.set_icon_from_path(abcIcon)
-
-                # Add the asset project root to the item properties.
-                project_root = cmds.workspace(q=True, rootDirectory=True)
-                item.properties["project_root"] = project_root
-
-                # Create the asset object an add it to the item properties.
-                # That allow to share the MayaAsset Class with the publish plugin.
-                item.properties["assetObject"]      = asset
-                item.properties["assetName"]        = asset.sgEntityName
-                item.properties["assetInstance"]    = asset.instance
-
-                # if a work template is defined, add it to the item properties so
-                # that it can be used by attached publish plugins
-                work_template_setting = settings.get("Work Template")
-                if work_template_setting:
-
-                    work_template = publisher.engine.get_template_by_name(
-                        work_template_setting.value
-                    )
-
-                    # store the template on the item for use by publish plugins. we
-                    # can't evaluate the fields here because there's no guarantee the
-                    # current session path won't change once the item has been created.
-                    # the attached publish plugins will need to resolve the fields at
-                    # execution time.
-                    item.properties["work_template"] = work_template
-                    self.logger.debug("Work template defined for Maya collection.")
+            # Check the end tag and create the corresponding item.
+            if(self.check_end_tag(transform, 'CAMBUF')):
+                self.collect_animation_camera(settings, parent_item, transform)
 
     def collect_for_sequence_setDress_publish(self, settings, parent_item):
         ''' Create the items to publish the set dressing.
@@ -364,10 +342,6 @@ class MayaSessionCollector(HookBaseClass):
                 # Create the publish item.
                 self.collect_camera(settings, parent_item, transform)
 
-            else:
-                # Create a default publish item.
-                pass
-
 # COLLECT BY ELEMENT FUNCTIONS.
 
     def collect_scene(self, settings, parent_item):
@@ -386,7 +360,7 @@ class MayaSessionCollector(HookBaseClass):
         fileName = cmds.file(q=True, sn=True)
 
         # Create the item.
-        item = parent_item.create_item("maya.workscene", "Maya Scene", fileName)
+        item = parent_item.create_item("maya.workscene", "Maya Scene", os.path.split(fileName)[-1])
 
         # Get the icon path to display for this item
         icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
@@ -471,6 +445,7 @@ class MayaSessionCollector(HookBaseClass):
         Returns:
             item                    : The new ui item.
         """
+        # Get the publisher.
         publisher = self.parent
 
         # Create the ui item for the environment.
@@ -506,6 +481,32 @@ class MayaSessionCollector(HookBaseClass):
             self.logger.debug("Work template defined for Maya collection.")
         
         return environmentItem
+
+    def collect_mayaObject(self, settings, parent_item, mayaObject, itemName, itemType):
+        """ Collect a maya object.
+
+        Args:
+            settings        (dict)                  :    Configured settings for this collector.
+            parent_item     ()                      :    Parent Item instance.
+            mayaObject      (:class:`MayaObject`)   :    The maya object linked.
+
+        Returns:
+            item                                    : The new ui item.
+        """
+        # Get the publisher.
+        publisher = self.parent
+
+        # Create the ui item for the object.
+        objectItem = parent_item.create_item(itemType, itemName, mayaObject.fullname)
+
+        # Get the icon path to display for this item
+        icon_path = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        objectItem.set_icon_from_path(icon_path)
+
+        # Add the maya object to the item properties.
+        objectItem.properties["mayaObject"] = mayaObject
+        
+        return objectItem
 
     def collect_asset(self, settings, parent_item, assetRoot):
         """ Collect an asset.
@@ -596,19 +597,52 @@ class MayaSessionCollector(HookBaseClass):
         Returns:
             item                            : The new ui item.
         """
+        # Create the Maya object for the environment.
+        mayaObject = P3Dfw.MayaAsset(assetRoot=assetRoot)
+
         # Create the main rig item.
-        mainItem = self.collect_mayaAsset(
+        mainItem = self.collect_mayaObject(
             settings,
             parent_item,
-            assetRoot,
-            "Asset Rig Master",
-            "maya.asset.rigMaster"
+            mayaObject,
+            "Asset Rig",
+            "maya.asset.rig"
         )
-        # Create the child rig item.
-        self.create_item_asset_rig_maya(mainItem, assetRoot)
 
-        # Create the alembic export.
-        self.create_item_asset_alembicLOD(mainItem, assetRoot)
+        # Create an item for each resolution.
+        for resolution in ["high", "mid", "low"]:
+
+            # Check if the resolution is available.
+            if(resolution == 'high' and not mayaObject.meshesHI):
+                continue
+            
+            if(resolution == 'mid' and not mayaObject.meshesMI):
+                continue
+
+            if(resolution == 'low' and not mayaObject.meshesLO):
+                continue
+
+            resolutionItem = mainItem.create_item(
+                "maya.asset.rig.{}".format(resolution),
+                "{} Resolution".format(resolution.capitalize()),
+                "{} Rig {}".format(mayaObject.fullname, resolution.capitalize())
+            )
+
+            # Create the item ui for the maya ascii export.
+            self.create_item_maya(
+                resolutionItem,
+                "maya.asset.rig.{}.ma".format(resolution),
+                'Maya Asset',
+                'Maya Asset {}'.format(resolution.capitalize())
+            )
+
+            # Create the item ui for the alembic export.
+            self.create_item_alembic(
+                resolutionItem,
+                "maya.asset.{}.abc".format(resolution),
+                'Alembic Asset',
+                'Alembic Asset {}'.format(resolution.capitalize())
+            )
 
     def collect_environment(self, settings, parent_item, environmentRoot):
         """ Collect an environment.
@@ -621,17 +655,40 @@ class MayaSessionCollector(HookBaseClass):
         Returns:
             item                        : The new ui item.
         """
+        # ParentItem
+        # - Environment
+        #   - MayaAscii
+        #     - Publish plugin
+        #   - Alembic
+        #     - Publish plugin 
+
+        # Create the Maya object for the environment.
+        mayaObject = P3Dfw.MayaEnvironment(root=environmentRoot)
+
         # Create the main item.
-        mainItem = self.collect_mayaEnvironment(
+        mainItem = self.collect_mayaObject(
             settings,
             parent_item,
-            environmentRoot,
+            mayaObject,
             "Environment",
             "maya.environment"
         )
 
+        # Create the item ui for the maya ascii export.
+        self.create_item_maya(
+            mainItem,
+            'maya.environment.ma',
+            'Maya Environment',
+            'Maya Environment'
+        )
+
         # Create the item ui for the alembic export.
-        self.create_item_environment_alembic(mainItem, environmentRoot)
+        self.create_item_alembic(
+            mainItem,
+            'maya.environment.abc',
+            'Alembic Environment',
+            'Alembic Environment'
+        )
 
         # Return the environment item.
         return mainItem
@@ -793,6 +850,206 @@ class MayaSessionCollector(HookBaseClass):
         # Return the item.
         return item
 
+# COLLECT ANIMATIONS.
+
+    def collect_animation_environment(self, settings, parent_item, environmentRoot):
+        """ Collect an environment.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            environmentRoot     (str)   : The environment root name.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # Create the Maya object for the environment.
+        mayaObject = P3Dfw.MayaEnvironment(root=environmentRoot)
+
+        # Create the main item.
+        mainItem = self.collect_mayaObject(
+            settings,
+            parent_item,
+            mayaObject,
+            "Environment",
+            "maya.shot.environment"
+        )
+
+        # Get the animation.
+        animatedAssets, deformedAssets = mayaObject.getAnimation()
+
+        # Create the item for the animated assets.
+        self.collect_animation_animatedAssets(settings, mainItem, animatedAssets)
+ 
+        # Create an item tp act has a parent for the deformed assets.
+        deformedAssetsItem = mainItem.create_item(
+            "maya.shot.environmentDeformed",
+            "Deformed Assets",
+            "Deformed Assets"
+        )
+        # Add the environment to the item properties.
+        deformedAssetsItem.properties["environmentObject"] = mayaObject
+
+        # Loop over the deformed assets.
+        for deformedAsset in deformedAssets:
+            # Create the item for the deformed asset.
+            self.collect_animation_deformedAsset(settings, deformedAssetsItem, deformedAsset)
+
+        # Return the environment item.
+        return mainItem
+
+    def collect_animation_animatedAssets(self, settings, parent_item, animatedAssets):
+        """ Collect the animated assets.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            animatedAssets      (list)  : The animated assets.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # Create an item for the type.
+
+        # Create an item to act has a parent for the animated assets.
+        mainItem = parent_item.create_item(
+            "maya.shot.environmentAnimated",
+            "Animated Assets",
+            "Animated Assets"
+        )
+        # Add the animated assets to the item properties.
+        mainItem.properties["animatedAssets"] = animatedAssets
+
+        # Create the item ui for the alembic export.
+        self.create_item_alembic(
+            mainItem,
+            'maya.shot.environmentAnimated.abc',
+            'Alembic Environment',
+            'Alembic Environment'
+        )
+
+        return mainItem
+
+    def collect_animation_deformedAsset(self, settings, parent_item, deformedAsset):
+        """ Collect a deformed asset.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            deformedAsset       (str)   : The deformed asset.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # Create the main item.
+        mainItem = parent_item.create_item(
+            "maya.shot.environmentDeformed",
+            "Deformed Asset",
+            deformedAsset.fullname.split('|')[-1].split(':')[0]
+        )
+        # Add the deformed asset to the item properties.
+        mainItem.properties["mayaObject"] = deformedAsset
+
+        # Create the item ui for the alembic export.
+        self.create_item_alembic(
+            mainItem,
+            'maya.shot.environmentDeformed.abc',
+            'Alembic Asset',
+            deformedAsset.fullname.split('|')[-1].split(':')[0]
+        )
+
+        return mainItem
+
+
+    def collect_animation_asset(self, settings, parent_item, assetRoot):
+        """ Collect an asset.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            assetRoot           (str)   : The asset root name.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # Create the Maya object for the asset.
+        mayaObject = P3Dfw.MayaAsset(assetRoot=assetRoot)
+
+        # Create the main item.
+        mainItem = self.collect_mayaObject(
+            settings,
+            parent_item,
+            mayaObject,
+            "Asset",
+            "maya.shot.assetInstance"
+        )
+
+        # Create the item ui for the alembic export.
+        self.create_item_alembic(
+            mainItem,
+            'maya.shot.assetInstance.abc',
+            'Alembic Asset',
+            mayaObject.fullname.split('|')[-1].split(':')[0]
+        )
+
+        # Return the asset item.
+        return mainItem
+
+    def collect_animation_camera(self, settings, parent_item, cameraRoot):
+        """ Collect a camera.
+
+        Args:
+            settings    (dict)              : Configured settings for this collector.
+            parent_item ()                  : Parent Item instance.
+            cameraRoot  (str)               : The camera root name.
+
+        Returns:
+            item                            : The new ui item.
+        """
+        publisher = self.parent
+
+        # Create an item for the camera.
+        cameraItem = parent_item.create_item('maya.shot.camera', 'Camera', cameraRoot)
+
+        # Get the icon path to display for this item.
+        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "camera.png")
+        cameraItem.set_icon_from_path(iconPath)
+
+        # Add the camera root to the item properties.
+        cameraItem.properties["cameraRoot"] = cameraRoot
+
+        # Add the project root to the item properties.
+        project_root = cmds.workspace(q=True, rootDirectory=True)
+        cameraItem.properties["project_root"] = project_root
+
+        # If a work template is defined, add it to the item properties so
+        # that it can be used by attached publish plugins.
+        work_template_setting = settings.get("Work Template")
+        if(work_template_setting):
+
+            work_template = publisher.engine.get_template_by_name(
+                work_template_setting.value
+            )
+
+            # Store the template on the item for use by publish plugins.
+            cameraItem.properties["work_template"] = work_template
+            self.logger.debug("Work template defined for Maya collection.")
+
+
+
+
+        # Create the item ui for the alembic export.
+        self.create_item_alembic(
+            cameraItem,
+            'maya.shot.camera.abc',
+            'Alembic Camera',
+            cameraRoot
+        )
+
+
+        # Return the camera item.
+        return cameraItem
+
 # CREATE ASSET ITEM FUNCTIONS.
 
     def create_item_asset_maya(self, parent_item, assetRoot):
@@ -842,11 +1099,11 @@ class MayaSessionCollector(HookBaseClass):
         # Create the item ui for the alembic export.
         abcIconPath         = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
 
-        abcAssetLOItem      = parent_item.create_item("maya.asset.alembicLO", "Alembic Low Resolution", "%s Low Meshes" % assetRoot)
+        abcAssetLOItem      = parent_item.create_item("maya.asset.low.abc", "Alembic Low Resolution", "%s Low Meshes" % assetRoot)
         abcAssetLOItem.set_icon_from_path(abcIconPath)
-        abcAssetMIItem      = parent_item.create_item("maya.asset.alembicMI", "Alembic Middle Resolution", "%s Mid Meshes" % assetRoot)
+        abcAssetMIItem      = parent_item.create_item("maya.asset.mid.abc", "Alembic Middle Resolution", "%s Mid Meshes" % assetRoot)
         abcAssetMIItem.set_icon_from_path(abcIconPath)
-        abcAssetHIItem      = parent_item.create_item("maya.asset.alembicHI", "Alembic High Resolution", "%s High Meshes" % assetRoot)
+        abcAssetHIItem      = parent_item.create_item("maya.asset.high.abc", "Alembic High Resolution", "%s High Meshes" % assetRoot)
         abcAssetHIItem.set_icon_from_path(abcIconPath)
         # abcAssetTechItem   = parent_item.create_item("maya.asset.alembicTech", "Alembic Technical", "%s Technical Meshes" % assetRoot)
         # abcAssetTechItem.set_icon_from_path(abcIconPath)
@@ -868,11 +1125,11 @@ class MayaSessionCollector(HookBaseClass):
         # Create the item ui for the maya export.
         mayaIcon = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
 
-        rigLoItem = parent_item.create_item("maya.asset.rigLO", "Asset Rig LO", assetRoot)
+        rigLoItem = parent_item.create_item("maya.asset.rig.low.ma", "Asset Rig LO", assetRoot)
         rigLoItem.set_icon_from_path(mayaIcon)
-        rigMiItem = parent_item.create_item("maya.asset.rigMI", "Asset Rig MI", assetRoot)
+        rigMiItem = parent_item.create_item("maya.asset.rig.mid.ma", "Asset Rig MI", assetRoot)
         rigMiItem.set_icon_from_path(mayaIcon)
-        rigHiItem = parent_item.create_item("maya.asset.rigHI", "Asset Rig HI", assetRoot)
+        rigHiItem = parent_item.create_item("maya.asset.rig.high.ma", "Asset Rig HI", assetRoot)
         rigHiItem.set_icon_from_path(mayaIcon)
 
         return parent_item
@@ -1046,33 +1303,43 @@ class MayaSessionCollector(HookBaseClass):
 
 # DEFAULT ITEMS FUNCTIONS.
 
-    def create_item_maya(self, parent_item, transform):
+    def create_item_maya(self, parent_item, itemType, itemTypeName, itemName):
         """
         Create an item to publish the transform as maya ascii.
 
         Args:
             parent_item     ()      : Parent Item instance.
-            transform       (str)   : The transform to export.
+            itemType        (str)   : The type of the item.
+            itemTypeName    (str)   : The name of the item type.
+            itemName        (str)   : The name of the item.
         
         Returns:
             item                    : The new ui item.
         """
-        # TODO.
-        pass
+        item    = parent_item.create_item(itemType, itemTypeName, itemName)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "maya.png")
+        item.set_icon_from_path(icon)
 
-    def create_item_alembic(self, parent_item, transform):
+        return item
+
+    def create_item_alembic(self, parent_item, itemType, itemTypeName, itemName):
         """
         Create an item to publish the transform as alembic.
 
         Args:
             parent_item     ()      : Parent Item instance.
-            transform       (str)   : The transform to export.
+            itemType        (str)   : The type of the item.
+            itemTypeName    (str)   : The name of the item type.
+            itemName        (str)   : The name of the item.
         
         Returns:
             item                    : The new ui item.
         """
-        # TODO.
-        pass
+        item    = parent_item.create_item(itemType, itemTypeName, itemName)
+        icon    = os.path.join(self.disk_location, os.pardir, "icons", "alembic.png")
+        item.set_icon_from_path(icon)
+
+        return item
 
 # DEFAULT COLLECT FUNCTIONS.
 
