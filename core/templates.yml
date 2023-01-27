@@ -655,6 +655,20 @@ camera_path: &camera_path
     shot_camera_alembic_publish:
         definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_camera.v{version}.abc"
 
+#
+# ASSET INSTANCE PATHS.
+#
+asset_instance: &asset_instance
+
+    asset_instance_directory_publish:
+        definition: '@asset_publish_root/v{version}/instance'
+
+    asset_instance_directory_alembic:
+        definition: '@asset_instance_directory_publish/alembic'
+
+    asset_instance_directory_ass:
+        definition: '@asset_instance_directory_publish}/ass'
+
 paths:
 
     # Common  path definitions to use as shorthand in order to avoid repetitive and verbose
@@ -697,6 +711,7 @@ paths:
     <<: *houdini_path
     <<: *nuke_path
     <<: *camera_path
+    <<: *asset_instance
 
     ##########################################################################################
     # Project level paths

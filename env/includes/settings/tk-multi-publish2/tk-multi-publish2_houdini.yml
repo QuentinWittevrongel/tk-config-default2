@@ -22,9 +22,14 @@ settings.tk-multi-publish2.houdini.asset_step:
   #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_session.py"
   #   settings:
   #       Publish Template: houdini_asset_publish
-  - name: Publish Asset Material X
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_materialX.py"
+  # - name: Publish Asset Material X
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_materialX.py"
+  #   settings:
+  #       Asset MaterialX Publish Template: asset_materialX_publish
+  - name: Publish Asset Lookdev
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_lookdev.py"
     settings:
+        Asset Geo Publish Template:       asset_instance_directory_publish
         Asset MaterialX Publish Template: asset_materialX_publish
   - name: Upload for review
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"

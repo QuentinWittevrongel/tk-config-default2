@@ -141,7 +141,10 @@ class HoudiniSessionCollector(HookBaseClass):
         item = self.collect_current_houdini_session(settings, parent_item)
 
         # Collect the ADAM Material X export nodes.
-        self.collect_adam_materialx_export_nodes(item)
+        # self.collect_adam_materialx_export_nodes(item)
+
+        # Collect the ADAM Lookdev asset nodes.
+        self.collect_adam_lookdev_asset_nodes(item)
 
 # CREATE REVIEW ITEM FUNCTIONS.
 
@@ -501,3 +504,52 @@ class HoudiniSessionCollector(HookBaseClass):
             itemCreated.append(item)
         
         return itemCreated
+
+    def collect_adam_lookdev_asset_nodes(self, parent_item):
+        ''' Collects Adam lookdevAsset export nodes.
+
+        Args:
+            parent_item     (sgItemUI)  : Root item instance
+        
+        Returns:
+            list(sgItemUI)              : List of collected items
+        '''
+
+        # Create a parent node.
+        nodesItem = parent_item.create_item(
+            "houdini.asset.lookdev",
+            "Lookdev Assets",
+            "Lookdev Assets"
+        )
+        # Set the icon.
+        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+        nodesItem.set_icon_from_path(iconPath)
+
+        # Get all the nodes
+        rootNode = hou.node('/obj')
+        nodes = [node for node in rootNode.allNodes() if node.type().nameComponents()[2] == 'lookdevAsset']
+
+        # Loop through all the Adam materialX export nodes
+        for node in nodes:
+
+            self.logger.info("Processing lookdev asset node: {}".format(node.path()))
+
+            # Get the node name.
+            node_name = node.name()
+
+            # Create the item.
+            nodeItem = parent_item.create_item(
+                "houdini.asset.lookdev.node",
+                "Lookdev",
+                node_name
+            )
+
+            # Add the node to the item properties.
+            nodeItem.properties['node'] = node
+
+            # Set the icon.
+            iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+            nodeItem.set_icon_from_path(iconPath)
+        
+        return nodesItem
+
