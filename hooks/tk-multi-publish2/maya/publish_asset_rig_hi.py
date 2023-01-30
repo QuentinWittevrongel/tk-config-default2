@@ -35,11 +35,12 @@ class MayaAssetRigHIPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidateMayaObject(
+        publihTools.hookPublishValidateAsset(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
+            "HI",
             addFields={"lod":"high"}
         )
 

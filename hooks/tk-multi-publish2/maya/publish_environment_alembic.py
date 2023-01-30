@@ -35,8 +35,7 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
             self,
             settings,
             item,
-            self.propertiesPublishTemplate,
-            isChild=True
+            self.propertiesPublishTemplate
         )
 
         # Override the publish type.
@@ -53,7 +52,7 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
             self,
             settings,
             item,
-            useFrameRange=True,
+            useFrameRange=False,
             isChild=True
         )
 

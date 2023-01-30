@@ -38,6 +38,8 @@ keys:
         type: str
     Asset:
         type: str
+    assetName:
+        type: str
     name:
         type: str
         filter_by: alphanumeric
@@ -301,6 +303,9 @@ alembic_path: &alembic_path
 
     asset_alembic_publish:
         definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}.v{version}.abc"
+
+    asset_alembic_instance_publish:
+        definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}_{assetName}_{instance}.v{version}.abc"
 
     houdini_asset_alembic_cache:
         definition: '@asset_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
@@ -661,7 +666,7 @@ camera_path: &camera_path
 asset_instance: &asset_instance
 
     asset_instance_directory_publish:
-        definition: '@asset_publish_root/v{version}/instance'
+        definition: '@asset_publish_root/v{version}/instance/{lod}'
 
     asset_instance_directory_alembic:
         definition: '@asset_instance_directory_publish/alembic'

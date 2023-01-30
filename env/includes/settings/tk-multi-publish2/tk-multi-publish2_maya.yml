@@ -86,6 +86,10 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_environment_alembic.py"
     settings:
         Environment Alembic Publish Template: asset_alembic_publish
+  - name: Publish Environment Alembic 
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_environmentDeformed_alembic.py"
+    settings:
+        Environment Alembic Publish Template: asset_alembic_instance_publish
   - name: Upload for review
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/review_playblast.py"
     settings: {}

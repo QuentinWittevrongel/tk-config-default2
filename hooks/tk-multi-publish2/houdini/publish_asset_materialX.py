@@ -4,6 +4,9 @@ import  sgtk
 
 from    tank_vendor import six
 
+# Import the node definition.
+from    adamPipe.materialXExportNode    import MaterialXExportNode
+
 # Import the houdini module of the P3D framework.
 P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("houdini")
 publihTools = P3Dfw.PublishTools()
@@ -23,7 +26,7 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
     @property
     def description(self):
         return """
-        <p>This plugin publishes the materialX from the MaterialXExport nodes present in the scene.</p>
+        <p>This plugins publishes the MaterialX of an asset for the Lookdev Asset nodes.</p>
         """
 
     @property
@@ -73,11 +76,12 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
             msg = "The output path is empty."
             self.logger.info(msg)
 
-        # Check if the node has the publish template selected.
-        selectedTemplate = node.parm('availablePaths').evalAsString()
-        if( selectedTemplate != item.properties.get(self.propertiesPublishTemplate).name ):
+        # Check if the node has the publish template selected for the MaterialX.
+        publishMTLXTemplate = settings[self.publishTemplate].value
+        selectedMTLXTemplate = node.parm("availablePaths").evalAsString()
+        if( selectedMTLXTemplate != publishMTLXTemplate ):
             accepted = False
-            msg = "The selected template is not the publish template."
+            msg = "The selected template for the MaterialX export is not the publish template."
             self.logger.info(msg)
 
         return {"accepted": accepted, "checked": checked}
@@ -109,64 +113,22 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
 
     def publish(self, settings, item):
 
-        # Perform the base publish.
-        publihTools.hookPublishMaterialXPublish(
-            self,
-            settings,
-            item,
-            isChild=False
-        )
+        publisher = self.parent
+
+        # Get the path to create and publish.
+        publish_path = item.properties["path"]
+
+        # Ensure the publish folder exists.
+        publish_folder = os.path.dirname(publish_path)
+        self.parent.ensure_folder_exists(publish_folder)
+
+        # Get the materialX node.
+        node = item.properties["node"]
+        # Update the output path.
+        MaterialXExportNode.setOutputPathField(node)
+        # Run the render for the materialX.
+        MaterialXExportNode.render(node)
 
         # Let the base class register the publish.
         super(HoudiniAssetMaterialXPublishPlugin, self).publish(settings, item)
 
-
-def _save_session(path):
-    """
-    Save the current session to the supplied path.
-    """
-    # We need to flip the slashes on Windows to avoid a bug in Houdini. If we don't
-    # the next Save As dialog will have the filename box populated with the complete
-    # file path.
-    sanitized_path = six.ensure_str(path.replace("\\", "/"))
-    hou.hipFile.save(file_name=sanitized_path)
-
-
-def _session_path():
-    """
-    Return the path to the current session
-    :return:
-    """
-
-    # Houdini always returns a file path, even for new sessions. We key off the
-    # houdini standard of "untitled.hip" to indicate that the file has not been
-    # saved.
-    if hou.hipFile.name() == "untitled.hip":
-        return None
-
-    return hou.hipFile.path()
-
-
-def _get_save_as_action():
-    """
-    Simple helper for returning a log action dict for saving the session
-    """
-
-    engine = sgtk.platform.current_engine()
-
-    # default save callback
-    callback = engine.save_as
-
-    # if workfiles2 is configured, use that for file save
-    if "tk-multi-workfiles2" in engine.apps:
-        app = engine.apps["tk-multi-workfiles2"]
-        if hasattr(app, "show_file_save_dlg"):
-            callback = app.show_file_save_dlg
-
-    return {
-        "action_button": {
-            "label": "Save As...",
-            "tooltip": "Save the current session",
-            "callback": callback,
-        }
-    }

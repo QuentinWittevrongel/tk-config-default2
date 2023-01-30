@@ -13,6 +13,11 @@ import hou
 import sgtk
 import re
 
+try:
+    from    adamPipe.lookdevAssetNode       import LookdevAssetNode
+except:
+    pass
+
 HookBaseClass = sgtk.get_hook_baseclass()
 
 # A dict of dicts organized by category, type and output file parm
@@ -141,7 +146,7 @@ class HoudiniSessionCollector(HookBaseClass):
         item = self.collect_current_houdini_session(settings, parent_item)
 
         # Collect the ADAM Material X export nodes.
-        # self.collect_adam_materialx_export_nodes(item)
+        self.collect_adam_materialx_export_nodes(item)
 
         # Collect the ADAM Lookdev asset nodes.
         self.collect_adam_lookdev_asset_nodes(item)
@@ -551,5 +556,37 @@ class HoudiniSessionCollector(HookBaseClass):
             iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
             nodeItem.set_icon_from_path(iconPath)
         
+            # Create the item for the materialX.
+            item = nodeItem.create_item(
+                "houdini.asset.materialX",
+                "Material X",
+                node_name
+            )
+            # Add the node to the item properties.
+            item.properties['node'] = LookdevAssetNode.getMaterialXExportNode(node)
+            # Set the icon.
+            iconPath = os.path.join(self.disk_location, os.pardir, "icons", "MaterialX.png")
+            item.set_icon_from_path(iconPath)
+
+            # Create one item per resolution.
+            resolutions = LookdevAssetNode.getResolutions(node)
+            for index, resolution in enumerate(resolutions):
+                # Create the item.
+                item = nodeItem.create_item(
+                    "houdini.asset.lookdev.buffers",
+                    "Buffers",
+                    resolution
+                )
+                item.properties['node']             = node
+                item.properties['resolution']       = resolution
+                item.properties['operatorPath']     = resolutions[resolution]
+                item.properties['resolutionIndex']  = index
+
+                # Set the icon.
+                iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+                item.set_icon_from_path(iconPath)
+
+
+
         return nodesItem
 

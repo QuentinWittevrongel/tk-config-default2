@@ -44,8 +44,7 @@ class MayaEnvironmentScenePublishPlugin(HookBaseClass):
             self,
             settings,
             item,
-            self.propertiesPublishTemplate,
-            isChild=True
+            self.propertiesPublishTemplate
         )
 
         # Override the publish type.

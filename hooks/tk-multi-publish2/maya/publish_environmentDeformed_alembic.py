@@ -20,53 +20,65 @@ publihTools = P3Dfw.PublishTools()
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class MayaAssetRigMIPublishPlugin(HookBaseClass):
+class MayaShotEnvironmentDeformedAlembicPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        return publihTools.hookPublishAcceptLOD(
+        return publihTools.hookPublishAccept(
             self,
             settings,
             item,
             self.publishTemplate,
             self.propertiesPublishTemplate,
-            "MI"
+            isChild=True
         )
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidateAsset(
+        mayaObject = publihTools.getItemProperty(item, "mayaObject")
+
+        publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
-            "MI",
-            addFields={"lod":"mid"}
+            addFields={
+                "assetName" : mayaObject.name,
+                "instance"  : "{:03d}".format(mayaObject.instance)
+            }
         )
 
+        # Get the environment object from the properties
+        # and check if it exists.
+        environmentObject = publihTools.getItemProperty(item, "environmentObject")
+        if( not cmds.objExists(environmentObject.fullname) ):
+            errorMsg = "The environment {} does not exist.".format(environmentObject.fullname)
+            self.logger.error(errorMsg)
+            raise Exception(errorMsg)
+
         # run the base class validation
-        return super(MayaAssetRigMIPublishPlugin, self).validate(settings, item)
+        return super(MayaShotEnvironmentDeformedAlembicPublishPlugin, self).validate(settings, item)
 
 
     def publish(self, settings, item):
 
-        publihTools.hookPublishMayaRigLODPublish(
+        publihTools.hookPublishAlembicDeformationEnvironmentPublish(
             self,
             settings,
             item,
-            "MI"
+            useFrameRange=False
         )
 
         # let the base class register the publish
-        super(MayaAssetRigMIPublishPlugin, self).publish(settings, item)
+        super(MayaShotEnvironmentDeformedAlembicPublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
-        return "Asset Rig MI Publish Template"
+        return "Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "asset_rig_mi_publish_template"
+        return "publish_template"
 
     @property
     def description(self):
@@ -78,7 +90,7 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaAssetRigMIPublishPlugin, self).settings or {}
+        base_settings = super(MayaShotEnvironmentDeformedAlembicPublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
@@ -98,4 +110,4 @@ class MayaAssetRigMIPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.rig.mid.ma"]
+        return ["maya.environmentDeformed.abc"]

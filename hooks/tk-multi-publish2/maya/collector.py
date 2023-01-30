@@ -655,12 +655,6 @@ class MayaSessionCollector(HookBaseClass):
         Returns:
             item                        : The new ui item.
         """
-        # ParentItem
-        # - Environment
-        #   - MayaAscii
-        #     - Publish plugin
-        #   - Alembic
-        #     - Publish plugin 
 
         # Create the Maya object for the environment.
         mayaObject = P3Dfw.MayaEnvironment(root=environmentRoot)
@@ -682,16 +676,72 @@ class MayaSessionCollector(HookBaseClass):
             'Maya Environment'
         )
 
-        # Create the item ui for the alembic export.
-        self.create_item_alembic(
+        # Get the animation.
+        animatedAssets, deformedAssets = mayaObject.getAnimation()
+        # Get the assets.
+        assets = mayaObject.getAssets()
+        # Gte the assets list without the deformedAssets.
+        notDeformedAssets = [asset for asset in assets if asset not in deformedAssets]
+
+        # Create the item for the not deformed assets.
+        alembicEnvironment = self.create_item_alembic(
             mainItem,
-            'maya.environment.abc',
-            'Alembic Environment',
-            'Alembic Environment'
+            "maya.environment.abc",
+            "Alembic Environment",
+            "Alembic Environment"
         )
+        # Add the environment to the item properties.
+        alembicEnvironment.properties["assets"] = notDeformedAssets
+
+        # Create an item to act has a parent for the deformed assets.
+        deformedAssetsItem = self.create_item_alembic(
+            mainItem,
+            "maya.environmentDeformed",
+            "Deformed Assets",
+            "Deformed Assets"
+        )
+        # Add the environment to the item properties.
+        deformedAssetsItem.properties["environmentObject"] = mayaObject
+
+        # Loop over the deformed assets.
+        for deformedAsset in deformedAssets:
+            # Create the item for the deformed asset.
+            self.collect_deformedAsset(settings, deformedAssetsItem, deformedAsset)
 
         # Return the environment item.
         return mainItem
+
+    def collect_deformedAsset(self, settings, parent_item, deformedAsset):
+        """ Collect a deformed asset.
+
+        Args:
+            settings            (dict)  : Configured settings for this collector.
+            parent_item         ()      : Parent Item instance.
+            deformedAsset       (str)   : The deformed asset.
+
+        Returns:
+            item                        : The new ui item.
+        """
+        # # Create the main item.
+        # mainItem = parent_item.create_item(
+        #     "maya.environmentDeformed",
+        #     "Deformed Asset",
+        #     deformedAsset.fullname.split('|')[-1].split(':')[0]
+        # )
+
+        # Create the item ui for the alembic export.
+        item = self.create_item_alembic(
+            parent_item,
+            'maya.environmentDeformed.abc',
+            'Alembic Asset',
+            deformedAsset.fullname.split('|')[-1].split(':')[0]
+        )
+        # Add the deformed asset to the item properties.
+        item.properties["mayaObject"] = deformedAsset
+
+        self.logger.info("Deformed asset: {}".format(deformedAsset.fullname))
+
+        return item
 
     def collect_camera(self, settings, parent_item, cameraRoot):
         """ Collect a camera.
@@ -881,7 +931,7 @@ class MayaSessionCollector(HookBaseClass):
         # Create the item for the animated assets.
         self.collect_animation_animatedAssets(settings, mainItem, animatedAssets)
  
-        # Create an item tp act has a parent for the deformed assets.
+        # Create an item to act has a parent for the deformed assets.
         deformedAssetsItem = mainItem.create_item(
             "maya.shot.environmentDeformed",
             "Deformed Assets",
