@@ -46,10 +46,10 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_alembic_sculpt.py"
     settings:
         Asset Alembic Sculpt Publish Template: asset_alembic_lod_publish
-  - name: Publish Asset Scene
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_scene.py"
+  - name: Publish Asset
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_maya.py"
     settings:
-        Asset Scene Publish Template: maya_asset_publish
+        Publish Template: maya_asset_publish
   - name: Publish Asset Rig Master
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_asset_rig_master.py"
     settings:
