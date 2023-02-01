@@ -57,6 +57,10 @@ settings.tk-multi-publish2.houdini.sequence_step:
   #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_session.py"
   #   settings:
   #       Publish Template: houdini_sequence_publish
+  - name: Publish SetDressing
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_sequence_setDressing.py"
+    settings:
+        Publish Template: houdini_sequence_digitalAsset_publish
   - name: Upload for review
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"
     settings: {}

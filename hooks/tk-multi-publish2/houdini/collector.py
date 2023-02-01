@@ -119,8 +119,13 @@ class HoudiniSessionCollector(HookBaseClass):
 
         elif(ctxtEntity["type"] == "Sequence"):
 
-            # Use the generic collector.
-            self.generic_collector(settings, parent_item)
+            if(ctxtStep["name"] == "Set Dress (Seq)"):
+                # Collect the data for a Shading Publish.
+                self.collect_for_seqSetDressing_publish(settings, parent_item)
+
+            else:
+                # Use the generic collector.
+                self.generic_collector(settings, parent_item)
 
         elif(ctxtEntity["type"] == "Shot"):
 
@@ -150,6 +155,19 @@ class HoudiniSessionCollector(HookBaseClass):
 
         # Collect the ADAM Lookdev asset nodes.
         self.collect_adam_lookdev_asset_nodes(item)
+
+    def collect_for_seqSetDressing_publish(self, settings, parent_item):
+        ''' Create the publish items for the sequence setdressing step.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Create the parent item.
+        item = self.collect_current_houdini_session(settings, parent_item)
+
+        # Collect the nodes.
+        self.collect_adam_setDressing_nodes(item)
 
 # CREATE REVIEW ITEM FUNCTIONS.
 
@@ -587,6 +605,53 @@ class HoudiniSessionCollector(HookBaseClass):
                 item.set_icon_from_path(iconPath)
 
 
+
+        return nodesItem
+
+    def collect_adam_setDressing_nodes(self, parent_item):
+        ''' Collects nodes.
+
+        Args:
+            parent_item     (sgItemUI)  : Root item instance
+        
+        Returns:
+            list(sgItemUI)              : List of collected items
+        '''
+
+        # Create a parent node.
+        nodesItem = parent_item.create_item(
+            "houdini.sequence.setDressing",
+            "Set Dressing",
+            "Set Dressing"
+        )
+        # Set the icon.
+        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+        nodesItem.set_icon_from_path(iconPath)
+
+        # Get all the selected nodes.
+        selectedNodes = hou.selectedNodes()
+
+        # Loop through all the Adam materialX export nodes
+        for node in selectedNodes:
+
+            self.logger.info("Processing selected nodes: {}".format(node.path()))
+
+            # Get the node name.
+            node_name = node.name()
+
+            # Create the item.
+            nodeItem = parent_item.create_item(
+                "houdini.sequence.setDressing.node",
+                "set Dressing",
+                node_name
+            )
+
+            # Add the node to the item properties.
+            nodeItem.properties['node'] = node
+
+            # Set the icon.
+            iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+            nodeItem.set_icon_from_path(iconPath)
 
         return nodesItem
 
