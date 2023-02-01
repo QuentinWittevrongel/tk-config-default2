@@ -116,6 +116,9 @@ class MayaSessionCollector(HookBaseClass):
 
         elif(ctxtEntity["type"] == "Shot"):
 
+            # Create an item representing the scene.
+            sceneItem = self.collect_scene(settings, parent_item)
+
             if(ctxtStep["name"] == "Animation"):
                 self.collect_for_shot_animation_publish(settings, sceneItem)
 
