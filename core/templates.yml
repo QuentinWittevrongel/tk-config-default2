@@ -471,6 +471,9 @@ houdini_path: &houdini_path
     houdini_sequence_publish:
         definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}.v{version}.{houdini_extension}'
 
+    houdini_sequence_digitalAsset_publish:
+        definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}_{houdini.node}.v{version}.{houdini_extension}'
+
     # SHOT TEMPLATES
 
     # define the location of a work area
