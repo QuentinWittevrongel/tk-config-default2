@@ -25,52 +25,44 @@ class MayaEnvironmentScenePublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        self.logger.info("Environment Scene Publish | accept")
+        self.logger.info("Environment Maya Publish | accept")
 
-        accepted = True
-        # Get the publish plugin publish template.
-        # This template is assgin in config.env.includes.settings.tk-multi-publish2.yml
-        template_name = settings[self.publishTemplate].value
-        # Check if the template is valid.
-        accepted, publish_template = publihTools.checkPublishTemplate(self, template_name)
-        # we've validated the publish template. add it to the item properties
-        # for use in subsequent methods
-        item.properties[self.propertiesPublishTemplate] = publish_template
-        # because a publish template is configured, disable context change. This
-        # is a temporary measure until the publisher handles context switching
-        # natively.
-        item.context_change_allowed = False
-
-        return {"accepted": accepted, "checked": True}
+        return publihTools.hookPublishAccept(
+            self,
+            settings,
+            item,
+            self.publishTemplate,
+            self.propertiesPublishTemplate,
+            isChild=True
+        )
 
     def validate(self, settings, item):
 
-        self.logger.info("Environment Scene Publish | validate")
+        self.logger.info("Environment Maya Publish | validate")
 
-        # Check if the environment is valid.
-        mayaObject = item.properties["mayaObject"]
-        if(not cmds.objExists(mayaObject.fullname)):
-            error_msg = "The environment {} is not a valid.".format(mayaObject)
-            self.logger.error(error_msg)
-            raise Exception(error_msg)
-        
-        # Add the publish path datas to the publish item.
-        # That allow us to reuse the datas for the publish.
-        publihTools.addPublishDatasToPublishItem(self, item, self.propertiesPublishTemplate)
+        publihTools.hookPublishValidateMayaObject(
+            self,
+            settings,
+            item,
+            self.propertiesPublishTemplate
+        )
 
-        # run the base class validation
+        # Override the publish type.
+        item.properties["publish_type"] = "Maya Environment"
+
+        # Run the base class validation
         return super(MayaEnvironmentScenePublishPlugin, self).validate(settings, item)
 
 
     def publish(self, settings, item):
 
-        self.logger.info("Environment Publish | publish")
+        self.logger.info("Environment Maya Publish | publish")
 
         publihTools.hookPublishMayaEnvironmentPublish(
             self,
             settings,
             item,
-            isChild=False
+            isChild=True
         )
 
         # let the base class register the publish
@@ -128,7 +120,7 @@ class MayaEnvironmentScenePublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.environment"]
+        return ["maya.environment.ma"]
 
 
 def _get_save_as_action():

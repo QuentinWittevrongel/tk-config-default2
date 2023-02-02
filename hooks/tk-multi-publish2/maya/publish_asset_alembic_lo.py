@@ -27,12 +27,11 @@ class MayaAssetAlembicLOPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidate(
+        publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
             self.propertiesPublishTemplate,
-            isChild=True,
             addFields={"lod":"low"}
         )
 
@@ -46,8 +45,7 @@ class MayaAssetAlembicLOPublishPlugin(HookBaseClass):
             settings,
             item,
             "LO",
-            useFrameRange=False,
-            isChild=True
+            useFrameRange=False
         )
 
         # let the base class register the publish
@@ -91,7 +89,7 @@ class MayaAssetAlembicLOPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.alembicLO"]
+        return ["maya.asset.low.abc"]
 
 def _session_path():
     """

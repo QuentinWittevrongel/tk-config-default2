@@ -146,66 +146,6 @@ settings.tk-multi-loader2.mari:
   title_name: Import
   location: '@apps.tk-multi-loader2.location'
 
-# maya
-settings.tk-multi-loader2.maya:
-  # Hook the tk-maya-loader2 actions hook.
-  actions_hook: "{config}/tk-multi-loader2/maya/P3D_maya_actions.py"
-  action_mappings:
-    Alembic Cache   : [reference, import, importWithoutNamespace]
-    Maya Scene      : [importWithoutNamespace, instanceReference, instanceReferenceWithoutNamespace, replaceSelectedReferencedInstance]
-    Image           : [texture_node, image_plane]
-    Photoshop Image : [texture_node, image_plane]
-    Rendered Image  : [texture_node, image_plane]
-    Texture         : [texture_node, image_plane]
-  entities:
-  
-  # P3D Customize Asset Tab START
-
-  - caption: Assets
-    entity_type: Task
-    hierarchy: [entity.Asset.sg_asset_type, entity, content]
-    filters:
-      - [project, is, "{context.project}"]
-      - [entity, is_not, null]
-      - [entity, type_is, Asset]
-
-  - caption: Sequences
-    entity_type: Sequence
-    filters:
-    - [project, is, "{context.project}"]
-    hierarchy: [code]
-
-  - caption: Shots
-    entity_type: Task
-    filters:
-      - [project, is, "{context.project}"]
-      - [entity, is_not, null]
-      - [entity, type_is, Shot]
-    hierarchy: [entity.Shot.sg_sequence, entity, content]
-
-  - caption: RnD
-    entity_type: CustomEntity03
-    filters:
-    - [project, is, "{context.project}"]
-    hierarchy: [sg_type, code]
-
-  # P3D Customize Asset Tab END
-
-  - caption: Assets - Linked
-    entity_type: Asset
-    filters:
-      - [ linked_projects, is, "{context.project}" ]
-    hierarchy: [ project.Project.name, sg_asset_type, code ]
-
-  - caption: My Tasks
-    entity_type: Task
-    filters:
-    - [task_assignees, is, "{context.user}"]
-    - [project, is, "{context.project}"]
-    hierarchy: [entity, content]
-  publish_filters: [["sg_status_list", "is_not", null]]
-  location: "@apps.tk-multi-loader2.location"
-
 # nuke
 settings.tk-multi-loader2.nuke:
   action_mappings:

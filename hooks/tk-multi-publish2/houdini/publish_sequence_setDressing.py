@@ -5,7 +5,7 @@ import  sgtk
 from    tank_vendor import six
 
 # Import the node definition.
-from    adamPipe.materialXExportNode    import MaterialXExportNode
+from    adamPipe.lookdevAssetNode       import LookdevAssetNode
 
 # Import the houdini module of the P3D framework.
 P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("houdini")
@@ -13,26 +13,26 @@ publihTools = P3Dfw.PublishTools()
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
+class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
 
     @property
     def publishTemplate(self):
-        return "Asset MaterialX Publish Template"
+        return "Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "asset_materialX_publish_template"
+        return "publish_template"
 
     @property
     def description(self):
         return """
-        <p>This plugins publishes the MaterialX of an asset for the Lookdev Asset nodes.</p>
+        <p>This plugin publishs the digital asset for the set dressing.</p>
         """
 
     @property
     def settings(self):
         # Inherit the settings from the base publish plugin.
-        base_settings = super(HoudiniAssetMaterialXPublishPlugin, self).settings or {}
+        base_settings = super(HoudiniSequenceSetDressingPublishPlugin, self).settings or {}
 
         # Settings specific to this class
         houdini_publish_settings = {
@@ -52,7 +52,7 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["houdini.asset.materialX"]
+        return ["houdini.sequence.setDressing.node"]
 
     def accept(self, settings, item):
 
@@ -69,20 +69,14 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
 
         # Get the node.
         node = item.properties["node"]
-        # Check if the output path is not empty.
-        outputPath = node.parm("materialXFile").eval()
-        if(not outputPath):
-            accepted = False
-            msg = "The output path is empty."
-            self.logger.info(msg)
 
-        # Check if the node has the publish template selected for the MaterialX.
-        publishMTLXTemplate = settings[self.publishTemplate].value
-        selectedMTLXTemplate = node.parm("availablePaths").evalAsString()
-        if( selectedMTLXTemplate != publishMTLXTemplate ):
+        # Check if the node is a digital asset.
+        nodeDefinition = node.type().definition()
+        if(not nodeDefinition):
+            errorMsg = "The node is not a digital asset."
+            self.logger.info(errorMsg)
             accepted = False
-            msg = "The selected template for the MaterialX export is not the publish template."
-            self.logger.info(msg)
+
 
         return {"accepted": accepted, "checked": checked}
 
@@ -95,6 +89,10 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
             self.logger.error(error)
             raise Exception(error)
 
+        # Extract the node name.
+        fullName = node.name()
+        name = fullName.split("_")[-2]
+
         # Perform the base validation.
         publihTools.hookPublishValidate(
             self,
@@ -102,33 +100,21 @@ class HoudiniAssetMaterialXPublishPlugin(HookBaseClass):
             item,
             self.propertiesPublishTemplate,
             isChild=False,
-            addFields={
-                'lod'       : node.parm("lod").evalAsString(),
-                'variant'   : node.parm('textureName').evalAsString()
-            }
+            addFields = {"node" : name}
         )
 
-        # run the base class validation
-        return super(HoudiniAssetMaterialXPublishPlugin, self).validate(settings, item)
+        # Run the base class validation.
+        return super(HoudiniSequenceSetDressingPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
-        publisher = self.parent
+        # Perform the digital asset export.
+        publihTools.hookPublishDigitalAssetPublish(
+            self,
+            settings,
+            item,
+        )
 
-        # Get the path to create and publish.
-        publish_path = item.properties["path"]
-
-        # Ensure the publish folder exists.
-        publish_folder = os.path.dirname(publish_path)
-        self.parent.ensure_folder_exists(publish_folder)
-
-        # Get the materialX node.
-        node = item.properties["node"]
-        # Update the output path.
-        MaterialXExportNode.setOutputPathField(node)
-        # Run the render for the materialX.
-        MaterialXExportNode.render(node)
-
-        # Let the base class register the publish.
-        super(HoudiniAssetMaterialXPublishPlugin, self).publish(settings, item)
+        # Let the base class register the geometry publish.
+        super(HoudiniSequenceSetDressingPublishPlugin, self).publish(settings, item)
 

@@ -1,0 +1,105 @@
+includes:
+- ../../app_locations.yml
+
+# DEFAULT
+settings.tk-multi-loader2.maya:
+  # Hook the tk-maya-loader2 actions hook.
+  actions_hook: "{config}/tk-multi-loader2/maya/P3D_maya_actions.py"
+  action_mappings:
+    Maya Scene      : [importWithoutNamespace, instanceReference, replaceSelectedReferencedInstance]
+  entities:
+
+  - caption: Assets
+    entity_type: Task
+    hierarchy: [entity.Asset.sg_asset_type, entity, content]
+    filters:
+      - [project, is, "{context.project}"]
+      - [entity, is_not, null]
+      - [entity, type_is, Asset]
+
+  - caption: Sequences
+    entity_type: Sequence
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [code]
+
+  - caption: Shots
+    entity_type: Task
+    filters:
+      - [project, is, "{context.project}"]
+      - [entity, is_not, null]
+      - [entity, type_is, Shot]
+    hierarchy: [entity.Shot.sg_sequence, entity, content]
+
+  - caption: RnD
+    entity_type: CustomEntity03
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [sg_type, code]
+
+  - caption: Assets - Linked
+    entity_type: Asset
+    filters:
+      - [ linked_projects, is, "{context.project}" ]
+    hierarchy: [ project.Project.name, sg_asset_type, code ]
+
+  - caption: My Tasks
+    entity_type: Task
+    filters:
+    - [task_assignees, is, "{context.user}"]
+    - [project, is, "{context.project}"]
+    hierarchy: [entity, content]
+  publish_filters: [["sg_status_list", "is_not", null]]
+  location: "@apps.tk-multi-loader2.location"
+
+# SHOT STEP
+settings.tk-multi-loader2.maya.shot_step:
+  # Hook the tk-maya-loader2 actions hook.
+  actions_hook: "{config}/tk-multi-loader2/maya/P3D_maya_actions.py"
+  action_mappings:
+    Maya Scene        : [instanceReference, replaceSelectedReferencedInstance]
+    Maya Environment  : [instanceReferenceWithoutNamespace]
+  entities:
+
+  - caption: Assets
+    entity_type: Task
+    hierarchy: [entity.Asset.sg_asset_type, entity, content]
+    filters:
+      - [project, is, "{context.project}"]
+      - [entity, is_not, null]
+      - [entity, type_is, Asset]
+
+  - caption: Sequences
+    entity_type: Sequence
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [code]
+
+  - caption: Shots
+    entity_type: Task
+    filters:
+      - [project, is, "{context.project}"]
+      - [entity, is_not, null]
+      - [entity, type_is, Shot]
+    hierarchy: [entity.Shot.sg_sequence, entity, content]
+
+  - caption: RnD
+    entity_type: CustomEntity03
+    filters:
+    - [project, is, "{context.project}"]
+    hierarchy: [sg_type, code]
+
+  - caption: Assets - Linked
+    entity_type: Asset
+    filters:
+      - [ linked_projects, is, "{context.project}" ]
+    hierarchy: [ project.Project.name, sg_asset_type, code ]
+
+  - caption: My Tasks
+    entity_type: Task
+    filters:
+    - [task_assignees, is, "{context.user}"]
+    - [project, is, "{context.project}"]
+    hierarchy: [entity, content]
+  publish_filters: [["sg_status_list", "is_not", null]]
+  location: "@apps.tk-multi-loader2.location"

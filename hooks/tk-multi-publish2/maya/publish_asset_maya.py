@@ -1,8 +1,14 @@
 
+"""
+Need to add the hook python file in the config.env.includes.settings.tk-multi-publish2.yml
+"""
+
+
 import os
 import maya.cmds as cmds
 import maya.mel as mel
 import sgtk
+import inspect
 
 from tank_vendor import six
 
@@ -10,54 +16,60 @@ from tank_vendor import six
 P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("maya")
 publihTools = P3Dfw.PublishTools()
 
+# Inherit from {self}/publish_file.py 
+# Check config.env.includes.settings.tk-multi-publish2.yml
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
+
+class MayaAssetScenePublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        return publihTools.hookPublishAcceptLOD(
+        self.logger.info("Asset Maya Publish | accept")
+
+        return publihTools.hookPublishAccept(
             self,
             settings,
             item,
             self.publishTemplate,
-            self.propertiesPublishTemplate,
-            "MI"
+            self.propertiesPublishTemplate
         )
 
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidateMayaObject(
+        self.logger.info("Asset Maya Publish | validate")
+
+        publihTools.hookPublishValidateAsset(
             self,
             settings,
             item,
-            self.propertiesPublishTemplate,
-            addFields={"lod":"mid"}
+            self.propertiesPublishTemplate
         )
 
         # run the base class validation
-        return super(MayaAssetAlembicMIPublishPlugin, self).validate(settings, item)
+        return super(MayaAssetScenePublishPlugin, self).validate(settings, item)
+
 
     def publish(self, settings, item):
 
-        publihTools.hookPublishAlembicLODPublish(
+        self.logger.info("Asset Maya Publish | publish")
+
+        publihTools.hookPublishMayaScenePublish(
             self,
             settings,
-            item,
-            "MI",
-            useFrameRange=False
+            item
         )
 
         # let the base class register the publish
-        super(MayaAssetAlembicMIPublishPlugin, self).publish(settings, item)
+        super(MayaAssetScenePublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
-        return "Asset Alembic MI Publish Template"
+        return "Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "asset_alembic_mi_publish_template"
+        return "publish_template"
 
     @property
     def description(self):
@@ -69,17 +81,17 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaAssetAlembicMIPublishPlugin, self).settings or {}
+        base_settings = super(MayaAssetScenePublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
-            self.publishTemplate: {
+            self.publishTemplate : {
                 "type": "template",
                 "default": None,
                 "description": "Template path for published work files. Should"
                 "correspond to a template defined in "
                 "templates.yml.",
-            }      
+            }
         }
 
         # update the base settings
@@ -87,21 +99,10 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
 
         return base_settings
 
+
     @property
     def item_filters(self):
-        return ["maya.asset.mid.abc"]
-
-def _session_path():
-    """
-    Return the path to the current session
-    :return:
-    """
-    path = cmds.file(query=True, sn=True)
-
-    if path is not None:
-        path = six.ensure_str(path)
-
-    return path
+        return ["maya.asset.ma"]
 
 
 def _get_save_as_action():

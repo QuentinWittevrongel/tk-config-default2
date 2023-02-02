@@ -21,8 +21,10 @@ includes:
 - ./tk-multi-shotgunpanel.yml
 - ./tk-multi-snapshot.yml
 - ./tk-multi-workfiles2.yml
+- ./tk-multi-setframerange.yml
 - ./tk-multi-breakdown2.yml
 - ./tk-multi-publish2/tk-multi-publish2_maya.yml
+- ./tk-multi-loader2/tk-multi-loader2_maya.yml
 
 ################################################################################
 
@@ -124,10 +126,9 @@ settings.tk-maya.shot_step:
   apps:
     tk-multi-about:
       location: "@apps.tk-multi-about.location"
-    tk-multi-setframerange:
-      location: "@apps.tk-multi-setframerange.location"
+    tk-multi-setframerange: "@settings.tk-multi-setframerange.maya"
     tk-multi-breakdown2: "@settings.tk-multi-breakdown2.maya"
-    tk-multi-loader2: "@settings.tk-multi-loader2.maya"
+    tk-multi-loader2: "@settings.tk-multi-loader2.maya.shot_step"
     tk-multi-publish2: "@settings.tk-multi-publish2.maya.shot_step"
     tk-multi-screeningroom: "@settings.tk-multi-screeningroom.rv"
     tk-multi-shotgunpanel: "@settings.tk-multi-shotgunpanel.maya"

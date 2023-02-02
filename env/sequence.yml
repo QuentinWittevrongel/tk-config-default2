@@ -36,7 +36,7 @@ engines:
   tk-houdini: "@settings.tk-houdini.sequence"
   tk-maya: "@settings.tk-maya.sequence"
   tk-nuke: "@settings.tk-nuke.sequence"
-  tk-photoshopcc: "@settings.tk-photoshopcc.sequence"
+  # tk-photoshopcc: "@settings.tk-photoshopcc.sequence"
   tk-shell: "@settings.tk-shell.sequence"
   tk-shotgun: "@settings.tk-shotgun.sequence"
 

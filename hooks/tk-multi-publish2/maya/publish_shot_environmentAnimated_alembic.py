@@ -12,11 +12,11 @@ publihTools = P3Dfw.PublishTools()
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
+class MayaShotEnvironmentAnimatedAlembicPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        self.logger.info("Environment Alembic Publish | accept")
+        self.logger.info("Shot Environment Alembic Publish | accept")
 
         return publihTools.hookPublishAccept(
             self,
@@ -29,55 +29,70 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        self.logger.info("Environment Alembic Publish | validate")
+        self.logger.info("Shot Environment Alembic Publish | validate")
+
+        mayaObject = publihTools.getItemProperty(item, "mayaObject")
+        self.logger.debug("mayaObject: {}".format(mayaObject))
 
         publihTools.hookPublishValidateMayaObject(
             self,
             settings,
             item,
-            self.propertiesPublishTemplate
+            self.propertiesPublishTemplate,
+            addFields={
+                "Asset" : mayaObject.name
+            }
         )
+
+        # Get the animated assets in the properties.
+        animatedAssets = publihTools.getItemProperty(item, "animatedAssets")
+        # Check if the animated assets exists.
+        for asset in animatedAssets:
+            if( not cmds.objExists(asset.fullname) ):
+                errorMsg = "The asset {} does not exist.".format(asset.fullname)
+                self.logger.error(errorMsg)
+                raise Exception(errorMsg)
 
         # Override the publish type.
         item.properties["publish_type"] = "Alembic Environment"
 
         # run the base class validation
-        return super(MayaEnvironmentAlembicPublishPlugin, self).validate(settings, item)
+        return super(MayaShotEnvironmentAnimatedAlembicPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
-        self.logger.info("Environment Alembic Publish | publish")
+        self.logger.info("Shot Environment Alembic Publish | publish")
 
-        publihTools.hookPublishAlembicEnvironmentPublish(
+        publihTools.hookPublishAlembicAnimationEnvironmentPublish(
             self,
             settings,
             item,
-            useFrameRange=False,
-            isChild=True
+            useFrameRange=True
         )
 
         # let the base class register the publish
-        super(MayaEnvironmentAlembicPublishPlugin, self).publish(settings, item)
+        super(MayaShotEnvironmentAnimatedAlembicPublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
-        return "Environment Alembic Publish Template"
+        return "Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "environment_alembic_publish_template"
+        return "publish_template"
 
     @property
     def description(self):
         return """
-        <p>This plugin publish the environment for the rig pipeline step.
+        <p>This plugin publish the assets that are not deformed and that are animated in an environment.
+        A keyframe is needed to tag the asset as animated.
         You need to select root transform of the environment.</p>
         """
 
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaEnvironmentAlembicPublishPlugin, self).settings or {}
+        base_settings = super(MayaShotEnvironmentAnimatedAlembicPublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
@@ -95,44 +110,6 @@ class MayaEnvironmentAlembicPublishPlugin(HookBaseClass):
 
         return base_settings
 
-
     @property
     def item_filters(self):
-        return ["maya.environment.abc"]
-
-def _session_path():
-    """
-    Return the path to the current session
-    :return:
-    """
-    path = cmds.file(query=True, sn=True)
-
-    if path is not None:
-        path = six.ensure_str(path)
-
-    return path
-
-
-def _get_save_as_action():
-    """
-    Simple helper for returning a log action dict for saving the session
-    """
-
-    engine = sgtk.platform.current_engine()
-
-    # default save callback
-    callback = cmds.SaveScene
-
-    # if workfiles2 is configured, use that for file save
-    if "tk-multi-workfiles2" in engine.apps:
-        app = engine.apps["tk-multi-workfiles2"]
-        if hasattr(app, "show_file_save_dlg"):
-            callback = app.show_file_save_dlg
-
-    return {
-        "action_button": {
-            "label": "Save As...",
-            "tooltip": "Save the current session",
-            "callback": callback,
-        }
-    }
+        return ["maya.shot.environmentAnimated.abc"]

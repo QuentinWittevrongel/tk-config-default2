@@ -69,4 +69,4 @@ engines.tk-substancepainter.location:
   type: git_branch
   path: https://github.com/QuentinWittevrongel/tk-substancepainter.git
   branch: master
-  version: 233ed3a
+  version: 2ebc7c6

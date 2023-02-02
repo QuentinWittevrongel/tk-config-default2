@@ -12,52 +12,70 @@ publihTools = P3Dfw.PublishTools()
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
+class MayaSelectionAlembicPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        return publihTools.hookPublishAcceptLOD(
+        return publihTools.hookPublishAccept(
             self,
             settings,
             item,
             self.publishTemplate,
-            self.propertiesPublishTemplate,
-            "MI"
+            self.propertiesPublishTemplate
         )
-
     def validate(self, settings, item):
 
-        publihTools.hookPublishValidateMayaObject(
+        # Get the selection from the item.
+        selection = item.parent.properties.get("selection")
+
+        # Check if the selection still exists.
+        for obj in selection:
+            if(not cmds.objExists(obj)):
+                errorMsg = "The object {} does not exist.".format(obj)
+                self.logger.error(errorMsg)
+                raise Exception(errorMsg)
+
+        publihTools.addPublishDatasToPublishItem(
             self,
-            settings,
             item,
-            self.propertiesPublishTemplate,
-            addFields={"lod":"mid"}
+            self.propertiesPublishTemplate
         )
 
         # run the base class validation
-        return super(MayaAssetAlembicMIPublishPlugin, self).validate(settings, item)
+        return super(MayaSelectionAlembicPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
-        publihTools.hookPublishAlembicLODPublish(
-            self,
-            settings,
-            item,
-            "MI",
-            useFrameRange=False
+        # Get the selection from the item.
+        selection = item.parent.properties.get("selection")
+
+        # Get the path.
+        publish_path = item.properties.get("path")
+
+        # Ensure the publish folder exists.
+        publish_folder = os.path.dirname(publish_path)
+        self.parent.ensure_folder_exists(publish_folder)
+
+        # Export the alembic.
+        publihTools.exportAlembic(
+            selection,
+            1,
+            1,
+            publish_path,
+            exportABCVersion    = 2,
+            spaceType           = "local"
         )
 
-        # let the base class register the publish
-        super(MayaAssetAlembicMIPublishPlugin, self).publish(settings, item)
+        # Let the base class register the publish
+        super(MayaSelectionAlembicPublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
-        return "Asset Alembic MI Publish Template"
+        return "Selection Alembic Publish Template"
 
     @property
     def propertiesPublishTemplate(self):
-        return "asset_alembic_mi_publish_template"
+        return "selection_alembic_publish_template"
 
     @property
     def description(self):
@@ -69,7 +87,7 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaAssetAlembicMIPublishPlugin, self).settings or {}
+        base_settings = super(MayaSelectionAlembicPublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
@@ -89,7 +107,7 @@ class MayaAssetAlembicMIPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.asset.mid.abc"]
+        return ["maya.selection.abc"]
 
 def _session_path():
     """

@@ -38,6 +38,8 @@ keys:
         type: str
     Asset:
         type: str
+    assetName:
+        type: str
     name:
         type: str
         filter_by: alphanumeric
@@ -242,13 +244,13 @@ maya_path: &maya_path
         definition: '@sequence_publish_root/maya'
     # The location of WIP files
     maya_sequence_work:
-        definition: '@sequence_work_area_maya/scenes/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+        definition: '@sequence_work_area_maya/scenes/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_sequence_snapshot:
-        definition: '@sequence_work_area_maya/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
+        definition: '@sequence_work_area_maya/snapshots/{Step}_{Sequence}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_sequence_publish:
-        definition: '@sequence_publish_root/v{version}/{Step}_{Shot}_{name}.v{version}.{maya_extension}'
+        definition: '@sequence_publish_root/v{version}/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
 
     # SHOT TEMPLATES
 
@@ -260,13 +262,13 @@ maya_path: &maya_path
         definition: '@shot_publish_root/maya'
     # The location of WIP files
     maya_shot_work:
-        definition: '@shot_work_area_maya/scenes/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
+        definition: '@shot_work_area_maya/scenes/{Step}_{Sequence}_{Shot}_{name}.v{version}.{maya_extension}'
     # The location of backups of WIP files
     maya_shot_snapshot:
-        definition: '@shot_work_area_maya/snapshots/{Step}_{Sequence}_{name}.v{version}.{timestamp}.{maya_extension}'
+        definition: '@shot_work_area_maya/snapshots/{Step}_{Sequence}_{Shot}_{name}.v{version}.{timestamp}.{maya_extension}'
     # The location of published maya files
     maya_shot_publish:
-        definition: '@shot_publish_root/v{version}/{Step}_{Sequence}_{name}.v{version}.{maya_extension}'
+        definition: '@shot_publish_root/v{version}/{Step}_{Sequence}_{Shot}_{name}.v{version}.{maya_extension}'
 
     # RND TEMPLATES
 
@@ -302,6 +304,9 @@ alembic_path: &alembic_path
     asset_alembic_publish:
         definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}.v{version}.abc"
 
+    asset_alembic_instance_publish:
+        definition: "@asset_publish_root/v{version}/alembic/{Step}_{Asset}_{name}_{assetName}_{instance}.v{version}.abc"
+
     houdini_asset_alembic_cache:
         definition: '@asset_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
 
@@ -311,29 +316,38 @@ alembic_path: &alembic_path
     # SEQUENCE TEMPLATES
 
     houdini_sequence_alembic_cache:
-        definition: '@sequence_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@sequence_work_area_houdini/abc/v{version}/{Step}_{Sequence}_{name}_{houdini.node}.v{version}.abc'
 
     houdini_sequence_alembic_publish:
-        definition: '@sequence_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@sequence_publish_root/v{version}/alembic/{Step}_{Sequence}_{name}_{houdini.node}.v{version}.abc'
 
     # SHOT TEMPLATES
 
     shot_alembic_publish:
-        definition: "@shot_publish_root/v{version}/{Step}_{Asset}_{instance}.v{version}.abc"
+        definition: "@shot_publish_root/v{version}/{Step}_{Sequence}_{Shot}_{name}.v{version}.abc"
+
+    shot_environment_animation_alembic_publish:
+        definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_{Asset}.v{version}.abc"
+
+    shot_environment_instance_alembic_publish:
+        definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_{Asset}_{instance}.v{version}.abc"
 
     houdini_shot_alembic_cache:
-        definition: '@shot_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@shot_work_area_houdini/abc/v{version}/{Step}_{Sequence}_{Shot}_{name}_{houdini.node}.v{version}.abc'
 
     houdini_shot_alembic_publish:
-        definition: '@shot_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_{houdini.node}.v{version}.abc'
 
     # RND TEMPLATE
 
+    rnd_alembic_publish:
+        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{CustomEntity03}_{name}.v{version}.abc'
+
     houdini_rnd_alembic_cache:
-        definition: '@rnd_work_area_houdini/abc/v{version}/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@rnd_work_area_houdini/abc/v{version}/{Step}_{CustomEntity03}_{name}_{houdini.node}.v{version}.abc'
 
     houdini_rnd_alembic_publish:
-        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{Asset}_{Asset}_{name}_{houdini.node}.v{version}.abc'
+        definition: '@rnd_publish_root/v{version}/alembic/{Step}_{CustomEntity03}_{name}_{houdini.node}.v{version}.abc'
 
 #
 # MATERIAL X PATHS
@@ -375,11 +389,11 @@ substance_painter_path: &substance_painter_path
 
     # define the location of a work area
     asset_work_area_substancepainter:
-        definition: '@asset_work_root/substancepainter'
+        definition: '@asset_work_root/painter'
         root_name: 'primary'
     # define the location of a publish area
     asset_publish_area_substancepainter:
-        definition: '@asset_publish_root/substancepainter'
+        definition: '@asset_publish_root/painter'
         root_name: 'primary'
     # The location of WIP files
     substancepainter_asset_work:
@@ -457,6 +471,9 @@ houdini_path: &houdini_path
     houdini_sequence_publish:
         definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}.v{version}.{houdini_extension}'
 
+    houdini_sequence_digitalAsset_publish:
+        definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}_{houdini.node}.v{version}.{houdini_extension}'
+
     # SHOT TEMPLATES
 
     # define the location of a work area
@@ -467,23 +484,23 @@ houdini_path: &houdini_path
         definition: '@shot_publish_root/houdini'
     # The location of WIP files
     houdini_shot_work:
-        definition: '@shot_work_area_houdini/{Step}_{Shot}_{name}.v{version}.{houdini_extension}'
+        definition: '@shot_work_area_houdini/{Step}_{Sequence}_{Shot}_{name}.v{version}.{houdini_extension}'
     # The location of backups of WIP files
     houdini_shot_snapshot:
-        definition: '@shot_work_area_houdini/snapshots/{Step}_{Shot}_{name}.v{version}.{timestamp}.{houdini_extension}'
+        definition: '@shot_work_area_houdini/snapshots/{Step}_{Sequence}_{Shot}_{name}.v{version}.{timestamp}.{houdini_extension}'
     # The location of published houdini files
     houdini_shot_publish:
-        definition: '@shot_publish_root/houdini/{Step}_{Shot}_{name}.v{version}.{houdini_extension}'
+        definition: '@shot_publish_root/houdini/{Step}_{Sequence}_{Shot}_{name}.v{version}.{houdini_extension}'
     # Rendered images
     houdini_shot_render:
-        definition: '@shot_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
+        definition: '@shot_root/work/images/{name}/{houdini.node}/v{version}/{width}x{height}/{Step}_{Sequence}_{Shot}_{name}_v{version}.{SEQ}.exr'
     # Additional mantra outputs
     houdini_shot_ifd:
-        definition: '@shot_root/work/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.ifd'
+        definition: '@shot_root/work/ifds/{name}/{houdini.node}/v{version}/{width}x{height}/{Step}_{Sequence}_{Shot}_{name}_v{version}.{SEQ}.ifd'
     houdini_shot_dcm:
-        definition: '@shot_root/work/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.dcm'
+        definition: '@shot_root/work/dcms/{name}/{houdini.node}/v{version}/{width}x{height}/{Step}_{Sequence}_{Shot}_{name}_v{version}.{SEQ}.dcm'
     houdini_shot_extra_plane:
-        definition: '@shot_root/work/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Shot}_{name}_v{version}.{SEQ}.exr'
+        definition: '@shot_root/work/images/{name}/{houdini.node}/{aov_name}/v{version}/{width}x{height}/{Step}_{Sequence}_{Shot}_{name}_v{version}.{SEQ}.exr'
 
     # RND TEMPLATES
 
@@ -628,6 +645,38 @@ nuke_path: &nuke_path
     rnd_quicktime_quick:
         definition: '@rnd_root/review/quickdaily/{Step}_{CustomEntity03}_{name}_{iteration}.mov'
 
+#
+# CAMERA PATHS
+#
+camera_path: &camera_path
+
+    # SEQUENCE TEMPLATES.
+
+    sequence_camera_alembic_publish:
+        definition: '@sequence_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}.v{version}.abc'
+
+    sequence_camera_ma_publish:
+        definition: '@sequence_publish_root/v{version}/maya/{Step}_{Sequence}_{Shot}.v{version}.ma'
+
+    # SHOT TEMPLATES.
+
+    shot_camera_alembic_publish:
+        definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_camera.v{version}.abc"
+
+#
+# ASSET INSTANCE PATHS.
+#
+asset_instance: &asset_instance
+
+    asset_instance_directory_publish:
+        definition: '@asset_publish_root/v{version}/instance/{lod}'
+
+    asset_instance_directory_alembic:
+        definition: '@asset_instance_directory_publish/alembic'
+
+    asset_instance_directory_ass:
+        definition: '@asset_instance_directory_publish}/ass'
+
 paths:
 
     # Common  path definitions to use as shorthand in order to avoid repetitive and verbose
@@ -669,6 +718,8 @@ paths:
     <<: *substance_painter_path
     <<: *houdini_path
     <<: *nuke_path
+    <<: *camera_path
+    <<: *asset_instance
 
     ##########################################################################################
     # Project level paths
