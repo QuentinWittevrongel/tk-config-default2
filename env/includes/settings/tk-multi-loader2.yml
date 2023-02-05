@@ -116,7 +116,7 @@ settings.tk-multi-loader2.houdini:
   action_mappings:
     Alembic Cache   : [importAlembic_sop]
     Mtlx File       : [importMtlx_rop]
-    Houdini Scene   : [merge]
+    Houdini Scene   : [merge, sopHDA]
     Image           : [file_cop]
     Photoshop Image : [file_cop]
     Rendered Image  : [file_cop]

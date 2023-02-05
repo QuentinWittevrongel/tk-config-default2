@@ -22,6 +22,11 @@ settings.tk-multi-publish2.maya.asset_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_session.py"
     settings:
         Publish Template: maya_asset_publish
+
+  - name: Save Scene
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/utility_saveScene.py"
+    settings: {}
+
   - name: Publish to ShotGrid
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_session_geometry.py"
     settings:
@@ -135,6 +140,14 @@ settings.tk-multi-publish2.maya.shot_step:
   - name: Upload for review
     hook: "{self}/upload_version.py"
     settings: {}
+
+  - name: Set FrameRange
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/utility_frameRange.py"
+    settings: {}
+  - name: Save Scene
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/utility_saveScene.py"
+    settings: {}
+
   - name: Publish Camera
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shot_camera_alembic.py"
     settings:

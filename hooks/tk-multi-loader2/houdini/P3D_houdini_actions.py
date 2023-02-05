@@ -118,6 +118,16 @@ class HoudiniActions(HookBaseClass):
                 }
             )
 
+        if("sopHDA" in actions):
+            action_instances.append(
+                {
+                    "name": "sopHDA",
+                    "params": None,
+                    "caption": "SOP HDA",
+                    "description": "Load a SOP HDA.",
+                }
+            )
+
         return action_instances
 
     def execute_multiple_actions(self, actions):
@@ -183,6 +193,9 @@ class HoudiniActions(HookBaseClass):
 
         if(name == "file_cop"):
             self._file_cop(path, sg_publish_data)
+        
+        if(name == "sopHDA"):
+            self._sopHDA(path, sg_publish_data)
 
     ##############################################################################################################
     # helper methods which can be subclassed in custom hooks to fine tune the behaviour of things
@@ -224,6 +237,13 @@ class HoudiniActions(HookBaseClass):
 
     def _importMtlxRop(self, path, sg_publish_data):
         loadTools.importMaterialXRop(
+            sg_publish_data.get("entity").get("name"),
+            path,
+            sg_publish_data
+        )
+    
+    def _sopHDA(self, path, sg_publish_data):
+        loadTools.importSOPHDA(
             sg_publish_data.get("entity").get("name"),
             path,
             sg_publish_data

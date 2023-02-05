@@ -123,6 +123,10 @@ class HoudiniSessionCollector(HookBaseClass):
                 # Collect the data for a Shading Publish.
                 self.collect_for_seqSetDressing_publish(settings, parent_item)
 
+            if(ctxtStep["name"] == "Lighting (Seq)"):
+                # Collect the data for a Shading Publish.
+                self.collect_for_seqLighting_publish(settings, parent_item)
+
             else:
                 # Use the generic collector.
                 self.generic_collector(settings, parent_item)
@@ -167,7 +171,20 @@ class HoudiniSessionCollector(HookBaseClass):
         item = self.collect_current_houdini_session(settings, parent_item)
 
         # Collect the nodes.
-        self.collect_adam_setDressing_nodes(item)
+        self.collect_selectedHDA_nodes(item)
+
+    def collect_for_seqLighting_publish(self, settings, parent_item):
+        ''' Create the publish items for the sequence lighting step.
+
+        Args:
+            setting         (dict)      : Configured settings for this collector
+            parent_item     (sgItemUI)  : Root item instance
+        '''
+        # Create the parent item.
+        item = self.collect_current_houdini_session(settings, parent_item)
+
+        # Collect the nodes.
+        self.collect_selectedHDA_nodes(item)
 
 # CREATE REVIEW ITEM FUNCTIONS.
 
@@ -574,42 +591,52 @@ class HoudiniSessionCollector(HookBaseClass):
             iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
             nodeItem.set_icon_from_path(iconPath)
         
-            # Create the item for the materialX.
-            item = nodeItem.create_item(
-                "houdini.asset.materialX",
-                "Material X",
-                node_name
-            )
-            # Add the node to the item properties.
-            item.properties['node'] = LookdevAssetNode.getMaterialXExportNode(node)
-            # Set the icon.
-            iconPath = os.path.join(self.disk_location, os.pardir, "icons", "MaterialX.png")
-            item.set_icon_from_path(iconPath)
+            # Get the toggleExportMtlx parameter.
+            toggleExportMtlx = node.parm('toggleExportMtlx').evalAsInt()
 
-            # Create one item per resolution.
-            resolutions = LookdevAssetNode.getResolutions(node)
-            for index, resolution in enumerate(resolutions):
-                # Create the item.
+            # If the toggleExportMtlx is on, create the materialX item.
+            if (toggleExportMtlx):
+                # Create the item for the materialX.
                 item = nodeItem.create_item(
-                    "houdini.asset.lookdev.buffers",
-                    "Buffers",
-                    resolution
+                    "houdini.asset.materialX",
+                    "Material X",
+                    node_name
                 )
-                item.properties['node']             = node
-                item.properties['resolution']       = resolution
-                item.properties['operatorPath']     = resolutions[resolution]
-                item.properties['resolutionIndex']  = index
-
+                # Add the node to the item properties.
+                item.properties['node'] = LookdevAssetNode.getMaterialXExportNode(node)
                 # Set the icon.
-                iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+                iconPath = os.path.join(self.disk_location, os.pardir, "icons", "MaterialX.png")
                 item.set_icon_from_path(iconPath)
+
+            # Get the toggleExportGeometry parameter.
+            toggleExportGeometry = node.parm('toggleExportGeometry').evalAsInt()
+
+            # If the toggleExportGeometry is on, create the geometry item.
+            if (toggleExportGeometry):
+                # Create one item per resolution.
+                resolutions = LookdevAssetNode.getResolutions(node)
+                for index, resolution in enumerate(resolutions):
+                    # Create the item.
+                    item = nodeItem.create_item(
+                        "houdini.asset.lookdev.buffers",
+                        "Buffers",
+                        resolution
+                    )
+                    item.properties['node']             = node
+                    item.properties['resolution']       = resolution
+                    item.properties['operatorPath']     = resolutions[resolution]
+                    item.properties['resolutionIndex']  = index
+
+                    # Set the icon.
+                    iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+                    item.set_icon_from_path(iconPath)
 
 
 
         return nodesItem
 
-    def collect_adam_setDressing_nodes(self, parent_item):
-        ''' Collects nodes.
+    def collect_selectedHDA_nodes(self, parent_item):
+        ''' Collects the selected HDA nodes.
 
         Args:
             parent_item     (sgItemUI)  : Root item instance
@@ -617,12 +644,11 @@ class HoudiniSessionCollector(HookBaseClass):
         Returns:
             list(sgItemUI)              : List of collected items
         '''
-
         # Create a parent node.
         nodesItem = parent_item.create_item(
-            "houdini.sequence.setDressing",
-            "Set Dressing",
-            "Set Dressing"
+            "houdini.selection.hda",
+            "Digital Assets",
+            "Digital Assets"
         )
         # Set the icon.
         iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
@@ -631,7 +657,7 @@ class HoudiniSessionCollector(HookBaseClass):
         # Get all the selected nodes.
         selectedNodes = hou.selectedNodes()
 
-        # Loop through all the Adam materialX export nodes
+        # Loop through all the nodes
         for node in selectedNodes:
 
             self.logger.info("Processing selected nodes: {}".format(node.path()))
@@ -641,8 +667,8 @@ class HoudiniSessionCollector(HookBaseClass):
 
             # Create the item.
             nodeItem = parent_item.create_item(
-                "houdini.sequence.setDressing.node",
-                "set Dressing",
+                "houdini.selection.hda.node",
+                "Digital Asset",
                 node_name
             )
 
