@@ -13,7 +13,7 @@ publihTools = P3Dfw.PublishTools()
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
-class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
+class HoudiniSelectionHdaPublishPlugin(HookBaseClass):
 
     @property
     def publishTemplate(self):
@@ -32,7 +32,7 @@ class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # Inherit the settings from the base publish plugin.
-        base_settings = super(HoudiniSequenceSetDressingPublishPlugin, self).settings or {}
+        base_settings = super(HoudiniSelectionHdaPublishPlugin, self).settings or {}
 
         # Settings specific to this class
         houdini_publish_settings = {
@@ -52,7 +52,7 @@ class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["houdini.sequence.setDressing.node"]
+        return ["houdini.selection.hda.node"]
 
     def accept(self, settings, item):
 
@@ -104,7 +104,7 @@ class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
         )
 
         # Run the base class validation.
-        return super(HoudiniSequenceSetDressingPublishPlugin, self).validate(settings, item)
+        return super(HoudiniSelectionHdaPublishPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
@@ -116,5 +116,5 @@ class HoudiniSequenceSetDressingPublishPlugin(HookBaseClass):
         )
 
         # Let the base class register the geometry publish.
-        super(HoudiniSequenceSetDressingPublishPlugin, self).publish(settings, item)
+        super(HoudiniSelectionHdaPublishPlugin, self).publish(settings, item)
 
