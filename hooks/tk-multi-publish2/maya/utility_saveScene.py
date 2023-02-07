@@ -49,6 +49,8 @@ class MayaSaveUtilityPublishPlugin(HookBaseClass):
         # Save the scene.
         cmds.file(save=True, force=True)
         
+    def finalize(self, settings, item):
+        return None
 
     @property
     def description(self):

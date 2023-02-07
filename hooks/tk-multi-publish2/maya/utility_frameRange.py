@@ -106,7 +106,9 @@ class MayaSaveUtilityPublishPlugin(HookBaseClass):
         # set frame ranges for rendering
         cmds.setAttr("defaultRenderGlobals.startFrame", in_frame)
         cmds.setAttr("defaultRenderGlobals.endFrame", out_frame)
-        
+
+    def finalize(self, settings, item):
+        return None        
 
     @property
     def description(self):
