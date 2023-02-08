@@ -18,21 +18,21 @@ settings.tk-multi-publish2.houdini.asset_step:
   - name: Begin file versioning
     hook: "{config}/tk-multi-publish2/houdini/start_version_control.py"
     settings: {}
-  # - name: Publish to ShotGrid
-  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_session.py"
+  # # - name: Publish to ShotGrid
+  # #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_session.py"
+  # #   settings:
+  # #       Publish Template: houdini_asset_publish
+  # - name: Publish Asset Material X
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_materialX.py"
   #   settings:
-  #       Publish Template: houdini_asset_publish
-  - name: Publish Asset Material X
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_materialX.py"
-    settings:
-        Asset MaterialX Publish Template: asset_materialX_publish
-  - name: Publish Asset Lookdev
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_lookdev_buffers.py"
-    settings:
-        Asset Geo Publish Template:       asset_instance_directory_publish
-  - name: Upload for review
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"
-    settings: {}
+  #       Asset MaterialX Publish Template: asset_materialX_publish
+  # - name: Publish Asset Lookdev
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_asset_lookdev_buffers.py"
+  #   settings:
+  #       Asset Geo Publish Template:       asset_instance_directory_publish
+  # - name: Upload for review
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"
+  #   settings: {}
 
   location: "@apps.tk-multi-publish2.location"
 
@@ -57,13 +57,13 @@ settings.tk-multi-publish2.houdini.sequence_step:
   #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_session.py"
   #   settings:
   #       Publish Template: houdini_sequence_publish
-  - name: Publish HDA
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_selection_hda.py"
-    settings:
-        Publish Template: houdini_sequence_digitalAsset_publish
-  - name: Upload for review
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"
-    settings: {}
+  # - name: Publish HDA
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/publish_selection_hda.py"
+  #   settings:
+  #       Publish Template: houdini_sequence_digitalAsset_publish
+  # - name: Upload for review
+  #   hook: "{self}/publish_file.py:{config}/tk-multi-publish2/houdini/review_playblast.py"
+  #   settings: {}
 
   location: "@apps.tk-multi-publish2.location"
 

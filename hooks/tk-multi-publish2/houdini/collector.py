@@ -13,10 +13,10 @@ import hou
 import sgtk
 import re
 
-try:
-    from    adamPipe.lookdevAssetNode       import LookdevAssetNode
-except:
-    pass
+# try:
+#     from    adamPipe.lookdevAssetNode       import LookdevAssetNode
+# except:
+#     pass
 
 HookBaseClass = sgtk.get_hook_baseclass()
 
@@ -88,6 +88,7 @@ class HoudiniSessionCollector(HookBaseClass):
         :param dict settings: Configured settings for this collector
         :param parent_item: Root item instance
         """
+        return
         # Get the current engine.
         currentEngine = sgtk.platform.current_engine()
         # Get the current context.
@@ -104,7 +105,7 @@ class HoudiniSessionCollector(HookBaseClass):
         ctxtUser = currentContext.user
 
         # Collect all the files for review.
-        self.collect_review(parent_item, currentContext)
+        # self.collect_review(parent_item, currentContext)
 
         # Configure the publish with the context.
         if(ctxtEntity["type"] == "Asset"):
@@ -121,7 +122,8 @@ class HoudiniSessionCollector(HookBaseClass):
 
             if(ctxtStep["name"] == "Set Dress (Seq)"):
                 # Collect the data for a Shading Publish.
-                self.collect_for_seqSetDressing_publish(settings, parent_item)
+                # self.collect_for_seqSetDressing_publish(settings, parent_item)
+                pass
 
             if(ctxtStep["name"] == "Lighting (Seq)"):
                 # Collect the data for a Shading Publish.
@@ -555,81 +557,81 @@ class HoudiniSessionCollector(HookBaseClass):
             list(sgItemUI)              : List of collected items
         '''
 
-        # Create a parent node.
-        nodesItem = parent_item.create_item(
-            "houdini.asset.lookdev",
-            "Lookdev Assets",
-            "Lookdev Assets"
-        )
-        # Set the icon.
-        iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
-        nodesItem.set_icon_from_path(iconPath)
+        # # Create a parent node.
+        # nodesItem = parent_item.create_item(
+        #     "houdini.asset.lookdev",
+        #     "Lookdev Assets",
+        #     "Lookdev Assets"
+        # )
+        # # Set the icon.
+        # iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+        # nodesItem.set_icon_from_path(iconPath)
 
-        # Get all the nodes
-        rootNode = hou.node('/obj')
-        nodes = [node for node in rootNode.allNodes() if node.type().nameComponents()[2] == 'lookdevAsset']
+        # # Get all the nodes
+        # rootNode = hou.node('/obj')
+        # nodes = [node for node in rootNode.allNodes() if node.type().nameComponents()[2] == 'lookdevAsset']
 
-        # Loop through all the Adam materialX export nodes
-        for node in nodes:
+        # # Loop through all the Adam materialX export nodes
+        # for node in nodes:
 
-            self.logger.info("Processing lookdev asset node: {}".format(node.path()))
+        #     self.logger.info("Processing lookdev asset node: {}".format(node.path()))
 
-            # Get the node name.
-            node_name = node.name()
+        #     # Get the node name.
+        #     node_name = node.name()
 
-            # Create the item.
-            nodeItem = parent_item.create_item(
-                "houdini.asset.lookdev.node",
-                "Lookdev",
-                node_name
-            )
+        #     # Create the item.
+        #     nodeItem = parent_item.create_item(
+        #         "houdini.asset.lookdev.node",
+        #         "Lookdev",
+        #         node_name
+        #     )
 
-            # Add the node to the item properties.
-            nodeItem.properties['node'] = node
+        #     # Add the node to the item properties.
+        #     nodeItem.properties['node'] = node
 
-            # Set the icon.
-            iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
-            nodeItem.set_icon_from_path(iconPath)
+        #     # Set the icon.
+        #     iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+        #     nodeItem.set_icon_from_path(iconPath)
         
-            # Get the toggleExportMtlx parameter.
-            toggleExportMtlx = node.parm('toggleExportMtlx').evalAsInt()
+        #     # Get the toggleExportMtlx parameter.
+        #     toggleExportMtlx = node.parm('toggleExportMtlx').evalAsInt()
 
-            # If the toggleExportMtlx is on, create the materialX item.
-            if (toggleExportMtlx):
-                # Create the item for the materialX.
-                item = nodeItem.create_item(
-                    "houdini.asset.materialX",
-                    "Material X",
-                    node_name
-                )
-                # Add the node to the item properties.
-                item.properties['node'] = LookdevAssetNode.getMaterialXExportNode(node)
-                # Set the icon.
-                iconPath = os.path.join(self.disk_location, os.pardir, "icons", "MaterialX.png")
-                item.set_icon_from_path(iconPath)
+        #     # If the toggleExportMtlx is on, create the materialX item.
+        #     if (toggleExportMtlx):
+        #         # Create the item for the materialX.
+        #         item = nodeItem.create_item(
+        #             "houdini.asset.materialX",
+        #             "Material X",
+        #             node_name
+        #         )
+        #         # Add the node to the item properties.
+        #         item.properties['node'] = LookdevAssetNode.getMaterialXExportNode(node)
+        #         # Set the icon.
+        #         iconPath = os.path.join(self.disk_location, os.pardir, "icons", "MaterialX.png")
+        #         item.set_icon_from_path(iconPath)
 
-            # Get the toggleExportGeometry parameter.
-            toggleExportGeometry = node.parm('toggleExportGeometry').evalAsInt()
+        #     # Get the toggleExportGeometry parameter.
+        #     toggleExportGeometry = node.parm('toggleExportGeometry').evalAsInt()
 
-            # If the toggleExportGeometry is on, create the geometry item.
-            if (toggleExportGeometry):
-                # Create one item per resolution.
-                resolutions = LookdevAssetNode.getResolutions(node)
-                for index, resolution in enumerate(resolutions):
-                    # Create the item.
-                    item = nodeItem.create_item(
-                        "houdini.asset.lookdev.buffers",
-                        "Buffers",
-                        resolution
-                    )
-                    item.properties['node']             = node
-                    item.properties['resolution']       = resolution
-                    item.properties['operatorPath']     = resolutions[resolution]
-                    item.properties['resolutionIndex']  = index
+        #     # If the toggleExportGeometry is on, create the geometry item.
+        #     if (toggleExportGeometry):
+        #         # Create one item per resolution.
+        #         resolutions = LookdevAssetNode.getResolutions(node)
+        #         for index, resolution in enumerate(resolutions):
+        #             # Create the item.
+        #             item = nodeItem.create_item(
+        #                 "houdini.asset.lookdev.buffers",
+        #                 "Buffers",
+        #                 resolution
+        #             )
+        #             item.properties['node']             = node
+        #             item.properties['resolution']       = resolution
+        #             item.properties['operatorPath']     = resolutions[resolution]
+        #             item.properties['resolutionIndex']  = index
 
-                    # Set the icon.
-                    iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
-                    item.set_icon_from_path(iconPath)
+        #             # Set the icon.
+        #             iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
+        #             item.set_icon_from_path(iconPath)
 
 
 
@@ -642,8 +644,9 @@ class HoudiniSessionCollector(HookBaseClass):
             parent_item     (sgItemUI)  : Root item instance
         
         Returns:
-            list(sgItemUI)              : List of collected items
+            sgItemUI                    : the item.
         '''
+
         # Create a parent node.
         nodesItem = parent_item.create_item(
             "houdini.selection.hda",
@@ -653,6 +656,8 @@ class HoudiniSessionCollector(HookBaseClass):
         # Set the icon.
         iconPath = os.path.join(self.disk_location, os.pardir, "icons", "houdini.png")
         nodesItem.set_icon_from_path(iconPath)
+
+        return nodesItem
 
         # Get all the selected nodes.
         selectedNodes = hou.selectedNodes()

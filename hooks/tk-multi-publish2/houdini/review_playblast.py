@@ -10,8 +10,8 @@ import inspect
 from tank_vendor import six
 
 # Import the houdini module of the P3D framework.
-P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("houdini")
-publihTools = P3Dfw.PublishTools()
+# P3Dfw = sgtk.platform.current_engine().frameworks["tk-framework-P3D"].import_module("houdini")
+# publihTools = P3Dfw.PublishTools()
 
 # Inherit from {self}/publish_file.py 
 # Check config.env.includes.settings.tk-multi-publish2.yml
@@ -40,22 +40,23 @@ class HoudiniPlayblastReviewPlugin(HookBaseClass):
 
     def validate(self, settings, item):
 
-        publihTools.hookUploadReviewValidate(
-            self,
-            settings,
-            item
-        )
+        # publihTools.hookUploadReviewValidate(
+        #     self,
+        #     settings,
+        #     item
+        # )
 
         # Run the base class validation
         return super(HoudiniPlayblastReviewPlugin, self).validate(settings, item)
 
     def publish(self, settings, item):
 
-        publihTools.hookUploadReviewPublish(
-            self,
-            settings,
-            item
-        )
+        # publihTools.hookUploadReviewPublish(
+        #     self,
+        #     settings,
+        #     item
+        # )
+        pass
 
     def finalize(self, settings, item):
         ''' Execute the finalization pass. This pass executes once all the publish
@@ -65,11 +66,11 @@ class HoudiniPlayblastReviewPlugin(HookBaseClass):
             settings    (:class:`PluginSetting`)    : The settings for the plugin.
             item        (:class:`PublishItem`)      : The item to process.
         # '''
-        publihTools.hookUploadReviewFinalize(
-            self,
-            settings,
-            item
-        )
+        # publihTools.hookUploadReviewFinalize(
+        #     self,
+        #     settings,
+        #     item
+        # )
 
     @property
     def icon(self):
