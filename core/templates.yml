@@ -472,7 +472,7 @@ houdini_path: &houdini_path
         definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}.v{version}.{houdini_extension}'
 
     houdini_sequence_digitalAsset_publish:
-        definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{name}_{houdini.node}.v{version}.{houdini_extension}'
+        definition: '@sequence_publish_root/houdini/v{version}/{Step}_{Sequence}_{houdini.node}.v{version}.{houdini_extension}'
 
     # SHOT TEMPLATES
 
