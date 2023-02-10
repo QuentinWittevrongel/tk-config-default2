@@ -118,13 +118,13 @@ class HoudiniActions(HookBaseClass):
                 }
             )
 
-        if("sopHDA" in actions):
+        if("importOBJHDA" in actions):
             action_instances.append(
                 {
-                    "name": "sopHDA",
+                    "name": "importOBJHDA",
                     "params": None,
-                    "caption": "SOP HDA",
-                    "description": "Load a SOP HDA.",
+                    "caption": "Import OBJ HDA",
+                    "description": "Import the digital asset in the Object context.",
                 }
             )
 
@@ -194,8 +194,8 @@ class HoudiniActions(HookBaseClass):
         if(name == "file_cop"):
             self._file_cop(path, sg_publish_data)
         
-        if(name == "sopHDA"):
-            self._sopHDA(path, sg_publish_data)
+        if(name == "importOBJHDA"):
+            self._importOBJHDA(path, sg_publish_data)
 
     ##############################################################################################################
     # helper methods which can be subclassed in custom hooks to fine tune the behaviour of things
@@ -242,8 +242,8 @@ class HoudiniActions(HookBaseClass):
             sg_publish_data
         )
     
-    def _sopHDA(self, path, sg_publish_data):
-        loadTools.importSOPHDA(
+    def _importOBJHDA(self, path, sg_publish_data):
+        loadTools.importOBJHDA(
             sg_publish_data.get("entity").get("name"),
             path,
             sg_publish_data

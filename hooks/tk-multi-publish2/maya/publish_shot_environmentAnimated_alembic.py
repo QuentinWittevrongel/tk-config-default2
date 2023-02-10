@@ -18,7 +18,7 @@ class MayaShotEnvironmentAnimatedAlembicPublishPlugin(HookBaseClass):
 
         self.logger.info("Shot Environment Alembic Publish | accept")
 
-        return publihTools.hookPublishAccept(
+        status = publihTools.hookPublishAccept(
             self,
             settings,
             item,
@@ -26,6 +26,17 @@ class MayaShotEnvironmentAnimatedAlembicPublishPlugin(HookBaseClass):
             self.propertiesPublishTemplate,
             isChild=True
         )
+        accepted = status['accepted']
+        checked = status['checked']
+
+        # Get the animated assets in the properties.
+        animatedAssets = publihTools.getItemProperty(item, "animatedAssets")
+        if(not animatedAssets):
+            errorMsg = "No animated asset found."
+            self.logger.debug(errorMsg)
+            accepted = False
+        
+        return {"accepted": accepted, "checked": checked}
 
     def validate(self, settings, item):
 

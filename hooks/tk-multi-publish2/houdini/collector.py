@@ -554,7 +554,6 @@ class HoudiniSessionCollector(HookBaseClass):
         Returns:
             list(sgItemUI)              : List of collected items
         '''
-
         # Create a parent node.
         nodesItem = parent_item.create_item(
             "houdini.asset.lookdev",
@@ -642,7 +641,7 @@ class HoudiniSessionCollector(HookBaseClass):
             parent_item     (sgItemUI)  : Root item instance
         
         Returns:
-            list(sgItemUI)              : List of collected items
+            sgItemUI                    : the item.
         '''
         # Create a parent node.
         nodesItem = parent_item.create_item(

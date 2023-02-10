@@ -941,6 +941,8 @@ class MayaSessionCollector(HookBaseClass):
         # Add the animated assets to the item properties.
         mainItem.properties["animatedAssets"] = animatedAssets
 
+        self.logger.debug("Collecting animated assets: {}".format(animatedAssets))
+
         # Create the item ui for the alembic export.
         self.create_item_alembic(
             mainItem,

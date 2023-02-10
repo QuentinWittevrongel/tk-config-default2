@@ -26,7 +26,7 @@ class HoudiniSelectionHdaPublishPlugin(HookBaseClass):
     @property
     def description(self):
         return """
-        <p>This plugin publishs the digital asset for the set dressing.</p>
+        <p>This plugin publishs the selected digital asset.</p>
         """
 
     @property
@@ -89,9 +89,12 @@ class HoudiniSelectionHdaPublishPlugin(HookBaseClass):
             self.logger.error(error)
             raise Exception(error)
 
-        # Extract the node name.
-        fullName = node.name()
-        name = fullName.split("_")[-2]
+        # Get the asset name.
+        assetName = node.type().name()
+        # Get the name out of it.
+        nodeName = assetName.split('_')[-1]
+        # Split the node name and the version.
+        nodeName, nodeVersion = nodeName.split('.v')
 
         # Perform the base validation.
         publihTools.hookPublishValidate(
@@ -100,8 +103,13 @@ class HoudiniSelectionHdaPublishPlugin(HookBaseClass):
             item,
             self.propertiesPublishTemplate,
             isChild=False,
-            addFields = {"node" : name}
+            addFields = {"node" : nodeName}
         )
+
+        # Override the publish type using the category.
+        category = node.type().category().name()
+        if(category == 'Object'):
+            item.properties["publish_type"] = "Houdini Object HDA"
 
         # Run the base class validation.
         return super(HoudiniSelectionHdaPublishPlugin, self).validate(settings, item)

@@ -12,6 +12,11 @@ import os
 import sgtk
 import hou
 
+# Import the adam pipe nodes.
+import adamPipe
+
+from adamScripts import DigitalAssetsManager
+
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
@@ -24,12 +29,12 @@ class BreakdownSceneOperations(HookBaseClass):
     - materialX node paths.
     """
 
-    def getNodes(self, category, node, filenameParameter):
+    def getNodes(self, category, nodeTypeName, filenameParameter):
         ''' Get all the nodes of a given type in the current file.
 
         Args:
             category            (:class:`hou.NodeTypeCategory()`)   : The category of the node type.
-            node                (str)                               : The name of the node type.
+            nodeTypeName        (str)                               : The name of the node type.
             filenameParameter   (str)                               : The name of the parameter that contains
                                                                     the file path.
 
@@ -39,21 +44,38 @@ class BreakdownSceneOperations(HookBaseClass):
         '''
         items = []
         # Get a list of all nodes in the file.
-        nodes = hou.nodeType(category, node)
-        if(not nodes):
+        nodesObjects = hou.nodeType(category, nodeTypeName)
+        if(not nodesObjects):
             return items
-        nodes = nodes.instances()
+        # Get the instances of the node type.
+        nodes = nodesObjects.instances()
         # Return an item for each node found. The breakdown app will check
         # the paths of each looking for a template match and a newer version.
-        for n in nodes:
-            file_parm = n.parm(filenameParameter)
-            file_path = os.path.normpath(file_parm.eval())
+        for node in nodes:
+
+            # Skip if the node is inside a locked network.
+            if(node.isInsideLockedHDA()):
+                continue
+
+            # Get the file path parameter.
+            parm = node.parm(filenameParameter)
+            # Check if the parameter is referenced.
+            if(parm.getReferencedParm() != parm):
+                continue
+
+            # Get the file path registered in the node.
+            path = os.path.normpath(parm.evalAsString())
+
+            extra_data = {
+                "parm"         : filenameParameter,
+            }
 
             items.append(
                 {
-                    "node_name": n.path(),
-                    "node_type": node,
-                    "path": file_path,
+                    "node_name"     : node.path(),
+                    "node_type"     : nodeTypeName,
+                    "path"          : path,
+                    "extra_data"    : extra_data,
                 }
             )
 
@@ -85,19 +107,94 @@ class BreakdownSceneOperations(HookBaseClass):
 
         items = []
 
-        # Get all the alembic nodes in the current file.
+        # Get all the ADAM Pipeline nodes in the current file.
+
+        # Scene Description Loader nodes.
         items.extend(self.getNodes(
-            hou.sopNodeTypeCategory(),
-            "alembic",
-            "fileName"
+            hou.objNodeTypeCategory(),
+            "ADAM::sceneDescriptionLoader::1.0",
+            "filePath"
         ))
 
-        # Get all the materialX nodes in the current file.
+        # Scene Animation Loader nodes.
         items.extend(self.getNodes(
-            hou.ropNodeTypeCategory(),
-            "arnold::materialx",
-            "filename"
+            hou.objNodeTypeCategory(),
+            "sceneAnimation::1.0",
+            "filePath"
         ))
+
+        # Asset Deformed Loader nodes both for the geo and the materialX.
+        items.extend(self.getNodes(
+            hou.objNodeTypeCategory(),
+            "assetDeformedLoader::1.0",
+            "geometryFilePath"
+        ))
+        items.extend(self.getNodes(
+            hou.objNodeTypeCategory(),
+            "assetDeformedLoader::1.0",
+            "materialXFilePath"
+        ))
+
+        # Asset Deformed Loader nodes both for the geo and the materialX.
+        items.extend(self.getNodes(
+            hou.objNodeTypeCategory(),
+            "assetAnimationLoader::1.0",
+            "geometryFilePath"
+        ))
+        items.extend(self.getNodes(
+            hou.objNodeTypeCategory(),
+            "assetAnimationLoader::1.0",
+            "materialXFilePath"
+        ))
+
+        # Get all the loaded HDA published.
+        # Get the engine.
+        engine = sgtk.platform.current_engine()
+        # Define a list of templates to look for.
+        templateNames = ['houdini_sequence_digitalAsset_publish']
+        # Get the templates.
+        templates = []
+        for templateName in templateNames:
+            templates.append( engine.get_template_by_name(templateName) )
+        
+        # Get all the nodes inside the OBJ context.
+        nodes = hou.node('/obj').allSubChildren(recurse_in_locked_nodes=False)
+        # Loop over the nodes.
+        for node in nodes:
+            # Check if the node is an HDA.
+            definition = node.type().definition()
+            if(not definition):
+                continue
+            
+            # Get the library path of the node.
+            libraryPath = definition.libraryFilePath()
+            # Check if one of the template is validated.
+            for template in templates:
+                if(template.validate(libraryPath)):
+
+                    # Add the node to the list.
+                    items.append({
+                        "node_name"     : node.path(),
+                        "node_type"     : "HDA",
+                        "path"          : libraryPath,
+                        "extra_data"    : {},
+                    })
+                    break
+
+
+        # # Get all the alembic nodes in the current file.
+        # items.extend(self.getNodes(
+        #     hou.sopNodeTypeCategory(),
+        #     "alembic",
+        #     "fileName"
+        # ))
+
+        # # Get all the materialX nodes in the current file.
+        # items.extend(self.getNodes(
+        #     hou.ropNodeTypeCategory(),
+        #     "arnold::materialx",
+        #     "filename"
+        # ))
 
         # Return the list of items.
         return items
@@ -112,23 +209,76 @@ class BreakdownSceneOperations(HookBaseClass):
         :param item: Dictionary on the same form as was generated by the scan_scene hook above.
                      The path key now holds the path that the node should be updated *to* rather than the current path.
         """
-
-        node_name   = item["node_name"]
-        node_type   = item["node_type"]
+        # Extract data from the item.
+        nodePath    = item["node_name"]
+        nodeType    = item["node_type"]
         path        = item["path"]
 
-        path        = path.replace("\\", "/")
+        extraData   = item["extra_data"]
+        parm        = extraData.get("parm", None)
 
-        if(node_type == "alembic"):
-            alembic_node = hou.node(node_name)
+        # Get the node.
+        node = hou.node(nodePath)
+        if(not node):
+            self.logger.error("Node '{}' not found.".format(nodePath))
+            return
+
+        # Format the path.
+        path = os.path.normpath(path).replace("\\", "/")
+
+        # Update the HDA.
+        if(nodeType == "HDA"):
             self.logger.debug(
-                "Updating alembic node '{}' to: {}".format(node_name, path)
+                "Updating HDA node '{}' to: {}".format(nodePath, path)
             )
-            alembic_node.parm("fileName").set(path)
+            DigitalAssetsManager.updateHDA(node, path)
+            
+
+        # Update the node.
+        elif(nodeType == "ADAM::sceneDescriptionLoader::1.0"):
+            self.logger.debug(
+                "Updating Scene Description Loader node '{}' to: {}".format(nodePath, path)
+            )
+            adamPipe.SceneDescriptionLoaderNode.updateFilePath(node, path)
         
-        elif(node_type == "arnold::materialx"):
-            materialx_node = hou.node(node_name)
+
+        elif(nodeType == "sceneAnimation::1.0"):
             self.logger.debug(
-                "Updating materialX node '{}' to: {}".format(node_name, path)
+                "Updating Scene Animation Loader node '{}' to: {}".format(nodePath, path)
             )
-            materialx_node.parm("filename").set(path)
+            adamPipe.SceneAnimationNode.updateFilePath(node, path)
+        
+
+        elif(nodeType == "assetDeformedLoader::1.0"):
+            self.logger.debug(
+                "Updating Asset Deformed Loader node '{}' to: {}".format(nodePath, path)
+            )
+            if(parm == "geometryFilePath"):
+                adamPipe.AssetDeformedLoaderNode.updateGeometryFilePath(node, path)
+            elif(parm == "materialXFilePath"):
+                adamPipe.AssetDeformedLoaderNode.updateMaterialXFilePath(node, path)
+        
+
+        elif(nodeType == "assetAnimationLoader::1.0"):
+            self.logger.debug(
+                "Updating Asset Animation Loader node '{}' to: {}".format(nodePath, path)
+            )
+            if(parm == "geometryFilePath"):
+                adamPipe.AssetAnimationLoaderNode.updateGeometryFilePath(node, path)
+            elif(parm == "materialXFilePath"):
+                adamPipe.AssetAnimationLoaderNode.updateMaterialXFilePath(node, path)
+
+
+        # if(node_type == "alembic"):
+        #     alembic_node = hou.node(node_name)
+        #     self.logger.debug(
+        #         "Updating alembic node '{}' to: {}".format(node_name, path)
+        #     )
+        #     alembic_node.parm("fileName").set(path)
+        
+        # elif(node_type == "arnold::materialx"):
+        #     materialx_node = hou.node(node_name)
+        #     self.logger.debug(
+        #         "Updating materialX node '{}' to: {}".format(node_name, path)
+        #     )
+        #     materialx_node.parm("filename").set(path)
