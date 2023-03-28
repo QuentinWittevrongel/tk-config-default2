@@ -93,7 +93,7 @@ class BeforeAppLaunch(tank.Hook):
         if(software_entity["code"] == "Maya"):
 
             # Add farmTools.
-            self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\farmTools\\0.4.1")
+            self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0")
 
             # Add Studio Library.
             self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\studiolibrary\\2.9.6.b3\\src")
@@ -110,8 +110,8 @@ class BeforeAppLaunch(tank.Hook):
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\frankenstein\\0.8.1\\windows\\2023\\module")
                 # Add ngSkin Tools.
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\ngskintools\\2.0.39\\ngskintools2\\2023\\module")
-                # Add aTools.
-                self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\aTools\\2.02\\module")
+                # Add aTools. Use local install for debug.
+                self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\aTools\\2.02\\module")
 
                 if(projectName == "ADAM"):
                     # Add Adam modules.
@@ -137,18 +137,15 @@ class BeforeAppLaunch(tank.Hook):
             elif(version == "19.5.303"):
                 # Add Houdini packages.
                 self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'Z:\\P3DTools\\productionPackages\\houdiniPackages')  
-
-                # Add SideFXLabs.
-                self.addToEnvironmentBegin('HOUDINI_PACKAGE_DIR', 'C:\\Program Files\\Side Effects Software\\sidefx_packages')
         
             if(projectName == "ADAM"):
                 # Add Adam Houdini packages.
-                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackagesDev')
+                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackages')
 
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')
-            self.addToEnvironmentBegin('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0')
-            self.addToEnvironmentEnd('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.4.0\\farmTools\\dccs\\nuke\\plugins')
+            self.addToEnvironmentBegin('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0')
+            self.addToEnvironmentEnd('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0\\farmTools\\dccs\\nuke\\plugins')
 
             if(projectName == "KML"):
                 self.addToEnvironmentEnd('NUKE_PATH', 'O:\\shows\\KML\\library\\compositing\\.nuke\\ProductionTools')
