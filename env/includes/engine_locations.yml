@@ -29,7 +29,6 @@ engines.tk-desktop2.location:
 #  version: vP3D
 engines.tk-houdini.location:
   type: git_branch
-  name: tk-houdini
   path: https://github.com/BaratteG/tk-houdini.git
   branch: master
   version: 40979f1
@@ -40,7 +39,6 @@ engines.tk-houdini.location:
 #  version: v0.11.4
 engines.tk-maya.location:
   type: git_branch
-  name: tk-maya
   path: https://github.com/BaratteG/tk-maya.git
   branch: master
   version: 0a98913

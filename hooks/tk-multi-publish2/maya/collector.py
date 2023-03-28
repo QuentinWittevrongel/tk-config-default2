@@ -111,6 +111,9 @@ class MayaSessionCollector(HookBaseClass):
 
         elif(ctxtEntity["type"] == "Sequence"):
 
+            # Create an item representing the scene.
+            sceneItem = self.collect_scene(settings, parent_item)
+
             if(ctxtStep["name"] == "Set Dress (Seq)"):
                 self.collect_for_sequence_setDress_publish(settings, sceneItem)
 
