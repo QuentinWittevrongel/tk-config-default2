@@ -110,7 +110,7 @@ class BeforeAppLaunch(tank.Hook):
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\frankenstein\\0.8.1\\windows\\2023\\module")
                 # Add ngSkin Tools.
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\ngskintools\\2.0.39\\ngskintools2\\2023\\module")
-                # Add aTools. Use local install for debug.
+                # Add aTools.
                 self.addToEnvironmentEnd("MAYA_MODULE_PATH", "Z:\\P3DTools\\productionPackages\\aTools\\2.02\\module")
 
                 if(projectName == "ADAM"):
@@ -119,7 +119,7 @@ class BeforeAppLaunch(tank.Hook):
                     # Add Adam scripts.
                     self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\maya\\scripts")
                     # Add Adam rig nodes.
-                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes-0.1.5\\module")
+                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes\\adamRigNodes-0.1.5\\module")
                     # Add Alembic 2.0.
                     self.addToEnvironmentEnd("MAYA_PLUG_IN_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\alembic\\2.0\\maya2023\\plug-ins")
                     # Add the picker.
@@ -140,7 +140,7 @@ class BeforeAppLaunch(tank.Hook):
         
             if(projectName == "ADAM"):
                 # Add Adam Houdini packages.
-                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackagesDev')
+                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackages')
 
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')

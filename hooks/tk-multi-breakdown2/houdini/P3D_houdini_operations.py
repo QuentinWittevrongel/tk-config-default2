@@ -112,14 +112,14 @@ class BreakdownSceneOperations(HookBaseClass):
         # Scene Description Loader nodes.
         items.extend(self.getNodes(
             hou.objNodeTypeCategory(),
-            "ADAM::sceneDescriptionLoader::1.0",
+            "sceneDescriptionLoader::2.0",
             "filePath"
         ))
 
         # Scene Animation Loader nodes.
         items.extend(self.getNodes(
             hou.objNodeTypeCategory(),
-            "sceneAnimation::1.0",
+            "sceneAnimation::2.0",
             "filePath"
         ))
 

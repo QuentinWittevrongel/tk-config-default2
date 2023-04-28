@@ -332,6 +332,9 @@ alembic_path: &alembic_path
     shot_environment_instance_alembic_publish:
         definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_{Asset}_{instance}.v{version}.abc"
 
+    shot_environment_instance_alembic_spline_publish:
+        definition: "@shot_publish_root/v{version}/alembic/{Step}_{Sequence}_{Shot}_{name}_{Asset}_{instance}_spline.v{version}.abc"
+
     houdini_shot_alembic_cache:
         definition: '@shot_work_area_houdini/abc/v{version}/{Step}_{Sequence}_{Shot}_{name}_{houdini.node}.v{version}.abc'
 
@@ -379,6 +382,17 @@ exr_path: &exr_path
 
     shot_exrRender_publish:
         definition: "@shot_publish_root/v{version}/{pass}/{Step}_{Shot}_{pass}.v{version}.exr"
+
+#
+# JSON PATHS
+#
+json_path: &json_path
+
+
+    # SHOT TEMPLATES
+
+    shot_assetInstance_frames_json:
+        definition: "@shot_publish_root/v{version}/json/{Step}_{Sequence}_{Shot}_{name}_{Asset}_{instance}.v{version}.json"
 
 #
 # SUBSTANCE PAINTER PATHS
@@ -715,6 +729,7 @@ paths:
     <<: *alembic_path
     <<: *materialX_path
     <<: *exr_path
+    <<: *json_path
     <<: *substance_painter_path
     <<: *houdini_path
     <<: *nuke_path

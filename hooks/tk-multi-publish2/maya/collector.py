@@ -1018,6 +1018,25 @@ class MayaSessionCollector(HookBaseClass):
             mayaObject.fullname.split('|')[-1].split(':')[0]
         )
 
+        # # Create the item ui for the spline alembic export.
+        # self.create_item(
+        #     mainItem,
+        #     'maya.shot.assetInstance.spline.abc',
+        #     'Alembic Spline',
+        #     mayaObject.fullname.split('|')[-1].split(':')[0],
+        #     'alembic.png'
+        # )
+
+        # # Create the item ui for the json frames export.
+        # self.create_item(
+        #     mainItem,
+        #     'maya.shot.assetInstance.frames.json',
+        #     'JSON Frames',
+        #     mayaObject.fullname.split('|')[-1].split(':')[0],
+        #     'json.png'
+        # )
+
+
         # Return the asset item.
         return mainItem
 
