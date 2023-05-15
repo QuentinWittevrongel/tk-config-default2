@@ -30,9 +30,15 @@ class BeforeAppLaunch(tank.Hook):
         :param env: (str) The name of the environment to update.
         :param path: (str) The path to add.
         """
+        # Check if the variable already exists.
         if(env in os.environ):
+            # Check if the path is already in the variable.
+            if(os.environ[env].find(path) != -1):
+                return
+            # Append the path at the begin.
             os.environ[env] = '%s;%s' % (path, os.environ[env])
         else:
+            # Create the variable with a & at the end.
             os.environ[env] = '%s;&' % path
 
     def addToEnvironmentEnd(self, env, path):
@@ -41,9 +47,15 @@ class BeforeAppLaunch(tank.Hook):
         :param env: (str) The name of the environment to update.
         :param path: (str) The path to add.
         """
+        # Check if the variable already exists.
         if(env in os.environ):
+            # Check if the path is already in the variable.
+            if(os.environ[env].find(path) != -1):
+                return
+            # Append the path at the end.
             os.environ[env] = '%s;%s' % (os.environ[env], path)
         else:
+            # Create the variable with a & at the begin.
             os.environ[env] = '&;%s' % path
 
     def execute(
@@ -140,7 +152,7 @@ class BeforeAppLaunch(tank.Hook):
         
             if(projectName == "ADAM"):
                 # Add Adam Houdini packages.
-                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackages')
+                self.addToEnvironmentEnd('HOUDINI_PACKAGE_DIR', 'P:\\shows\\ADAM\\td\\houdini\\houdiniPackagesDev')
 
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')
