@@ -168,10 +168,10 @@ settings.tk-multi-publish2.maya.shot_step:
     hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shot_assetInstance_spline_alembic.py"
     settings:
         Publish Template: shot_environment_instance_alembic_spline_publish
-  - name: Publish Frames
-    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shot_assetInstance_frames_json.py"
+  - name: Publish Local
+    hook: "{self}/publish_file.py:{config}/tk-multi-publish2/maya/publish_shot_assetInstance_local_alembic.py"
     settings:
-        Publish Template: shot_assetInstance_frames_json
+        Publish Template: shot_environment_instance_alembic_local_publish
 
   location: "@apps.tk-multi-publish2.location"
 

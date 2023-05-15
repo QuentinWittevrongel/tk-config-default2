@@ -21,11 +21,11 @@ publihTools = P3Dfw.PublishTools()
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
-class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
+class MayaShotAssetInstanceLocalAlembicPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
-
-        acceptStates = publihTools.hookPublishAccept(
+    
+        return publihTools.hookPublishAccept(
             self,
             settings,
             item,
@@ -33,29 +33,23 @@ class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
             self.propertiesPublishTemplate,
             isChild=True
         )
-        # Uncheck by default.
-        acceptStates["checked"] = False
-    
-        return acceptStates
 
     def validate(self, settings, item):
 
         mayaObject = publihTools.getItemProperty(item, "mayaObject")
         asset = mayaObject.fullname
+        # Get the namespace.
+        namespace = mayaObject.rootNamespace
 
-        # Get every controllers children of the asset. Transforms that ends with _CON.
-        controllers = cmds.listRelatives(asset, allDescendents=True, type='transform', fullPath=True)
-        controllers = [x for x in controllers if x.endswith('_CON')]
+        # Get the local controller.
+        localCon = '{RIG}|{NS}:base_module|{NS}:base_controllers_GRP|{NS}:base_FK_GRP|{NS}:base_global_CON|{NS}:base_local_CON'.format(
+            RIG = mayaObject.groupRig,
+            NS = namespace
+        )
 
-        # Get the keyed frames.
-        keyedframes = cmds.keyframe(controllers, query=True, timeChange=True)
-        if(keyedframes):
-            keyedFrames = list(set(keyedframes))
-        else:
-            keyedFrames = []
         # Check if there is at least two keyframe.
-        if(len(keyedFrames) < 2):
-            errorMsg = "The asset {} has no animation.".format(mayaObject.name)
+        if(not cmds.objExists(localCon)):
+            errorMsg = "The asset {} has no local controller.".format(mayaObject.name)
             self.logger.error(errorMsg)
             raise Exception(errorMsg)
 
@@ -71,7 +65,7 @@ class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
         )
 
         # run the base class validation
-        return super(MayaShotAssetInstanceFramesJsonPublishPlugin, self).validate(settings, item)
+        return super(MayaShotAssetInstanceLocalAlembicPublishPlugin, self).validate(settings, item)
 
 
     def publish(self, settings, item):
@@ -79,32 +73,32 @@ class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
         # Get the asset.
         mayaObject = publihTools.getItemProperty(item, "mayaObject")
         asset = mayaObject.fullname
+        # Get the namespace.
+        namespace = mayaObject.rootNamespace
 
-        # Get every controllers children of the asset. Transforms that ends with _CON.
-        controllers = cmds.listRelatives(asset, allDescendents=True, type='transform', fullPath=True)
-        controllers = [x for x in controllers if x.endswith('_CON')]
+        # Get the local controller.
+        localCon = '{RIG}|{NS}:base_module|{NS}:base_controllers_GRP|{NS}:base_FK_GRP|{NS}:base_global_CON|{NS}:base_local_CON'.format(
+            RIG = mayaObject.groupRig,
+            NS = namespace
+        )
 
-        # Get the keyed frames.
-        keyedframes = cmds.keyframe(controllers, query=True, timeChange=True)
-        if(keyedframes):
-            keyedFrames = list(set(keyedframes))
-        # Sort the keyed frames.
-        keyedFrames.sort()
+        # Check if there is at least two keyframe.
+        if(not cmds.objExists(localCon)):
+            errorMsg = "The asset {} has no local controller.".format(mayaObject.name)
+            self.logger.error(errorMsg)
+            raise Exception(errorMsg)
 
 
-        # Get the path to create and publish.
-        publish_path = item.properties["path"]
-
-        # Ensure the publish folder exists:
-        publish_folder = os.path.dirname(publish_path)
-        self.parent.ensure_folder_exists(publish_folder)
-        # Write a json file.
-        with open(publish_path, 'w') as f:
-            json.dump(keyedFrames, f, indent=4)
-
+        # Publish the alembic.
+        publihTools.hookPublishAlembicAnimationPublish(
+            self,
+            settings,
+            item,
+            useFrameRange = False
+        )
 
         # let the base class register the publish
-        super(MayaShotAssetInstanceFramesJsonPublishPlugin, self).publish(settings, item)
+        super(MayaShotAssetInstanceLocalAlembicPublishPlugin, self).publish(settings, item)
 
     @property
     def publishTemplate(self):
@@ -124,7 +118,7 @@ class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
     @property
     def settings(self):
         # inherit the settings from the base publish plugin
-        base_settings = super(MayaShotAssetInstanceFramesJsonPublishPlugin, self).settings or {}
+        base_settings = super(MayaShotAssetInstanceLocalAlembicPublishPlugin, self).settings or {}
 
         # settings specific to this class
         maya_publish_settings = {
@@ -144,4 +138,4 @@ class MayaShotAssetInstanceFramesJsonPublishPlugin(HookBaseClass):
 
     @property
     def item_filters(self):
-        return ["maya.shot.assetInstance.frames.json"]
+        return ["maya.shot.assetInstance.local.abc"]

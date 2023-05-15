@@ -24,7 +24,7 @@ class MayaShotAssetInstanceSplineAlembicPublishPlugin(HookBaseClass):
 
     def accept(self, settings, item):
 
-        acceptStates = publihTools.hookPublishAccept(
+        return publihTools.hookPublishAccept(
             self,
             settings,
             item,
@@ -32,10 +32,6 @@ class MayaShotAssetInstanceSplineAlembicPublishPlugin(HookBaseClass):
             self.propertiesPublishTemplate,
             isChild=True
         )
-        # Uncheck by default.
-        acceptStates["checked"] = False
-    
-        return acceptStates
 
     def validate(self, settings, item):
 
@@ -79,17 +75,43 @@ class MayaShotAssetInstanceSplineAlembicPublishPlugin(HookBaseClass):
         mayaObject = publihTools.getItemProperty(item, "mayaObject")
         asset = mayaObject.fullname
 
+
         # Get every controllers children of the asset. Transforms that ends with _CON.
         controllers = cmds.listRelatives(asset, allDescendents=True, type='transform', fullPath=True)
         controllers = [x for x in controllers if x.endswith('_CON')]
-        # Spline every key.
-        cmds.keyTangent(controllers, inTangentType='auto', outTangentType='auto', time=(None,None))
 
+        # Get the keyed frames.
+        keyedframes = cmds.keyframe(controllers, query=True, timeChange=True)
+        if(keyedframes):
+            keyedFrames = list(set(keyedframes))
+        # Sort the keyed frames.
+        keyedFrames.sort()
+
+        # Check if there is at least two keyframe.
+        if(len(keyedFrames) < 2):
+            errorMsg = "The asset {} has no animation.".format(mayaObject.name)
+            self.logger.error(errorMsg)
+            raise Exception(errorMsg)
+
+        # Loop through the keyed frames.
+        for frame in keyedFrames:
+            # Set the current time.
+            cmds.currentTime(frame)
+            # Loop through the controllers.
+            for controller in controllers:
+                # Key every attributes with a step tangent.
+                cmds.setKeyframe(controller, time=frame, inTangentType='clamped', outTangentType='step')
+
+        # Set the tangents.
+        cmds.keyTangent(controllers, inTangentType='auto', outTangentType='auto', time=(None,None))
+        
+
+        # Publish the alembic.
         publihTools.hookPublishAlembicAnimationPublish(
             self,
             settings,
             item,
-            useFrameRange   = True
+            useFrameRange = True
         )
 
         # let the base class register the publish

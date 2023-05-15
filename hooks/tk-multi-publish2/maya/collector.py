@@ -1018,24 +1018,35 @@ class MayaSessionCollector(HookBaseClass):
             mayaObject.fullname.split('|')[-1].split(':')[0]
         )
 
-        # # Create the item ui for the spline alembic export.
-        # self.create_item(
-        #     mainItem,
-        #     'maya.shot.assetInstance.spline.abc',
-        #     'Alembic Spline',
-        #     mayaObject.fullname.split('|')[-1].split(':')[0],
-        #     'alembic.png'
-        # )
+        # Check if the asset is referenced and extract the path.
+        refPath = mayaObject.referencePath
+        if(refPath):
+            # Get the asset rig publish template.
+            template = self.parent.engine.get_template_by_name('maya_asset_rig_publish')
+            # Check if the path matches the template.
+            fields = template.validate_and_get_fields(refPath)
+            if(fields):
+                # Get the asset field.
+                assetField = fields.get('Asset')
+                # Create special publish for Yuri.
+                if(assetField == "yuri"):
+                    # Create the item ui for the spline alembic export.
+                    self.create_item(
+                        mainItem,
+                        'maya.shot.assetInstance.spline.abc',
+                        'Alembic Spline',
+                        mayaObject.fullname.split('|')[-1].split(':')[0],
+                        'alembic.png'
+                    )
 
-        # # Create the item ui for the json frames export.
-        # self.create_item(
-        #     mainItem,
-        #     'maya.shot.assetInstance.frames.json',
-        #     'JSON Frames',
-        #     mayaObject.fullname.split('|')[-1].split(':')[0],
-        #     'json.png'
-        # )
-
+                    # Create the item ui for the local alembic export.
+                    self.create_item(
+                        mainItem,
+                        'maya.shot.assetInstance.local.abc',
+                        'Alembic Local',
+                        mayaObject.fullname.split('|')[-1].split(':')[0],
+                        'alembic.png'
+                    )
 
         # Return the asset item.
         return mainItem

@@ -235,14 +235,14 @@ class BreakdownSceneOperations(HookBaseClass):
             
 
         # Update the node.
-        elif(nodeType == "ADAM::sceneDescriptionLoader::1.0"):
+        elif(nodeType == "ADAM::sceneDescriptionLoader::2.0"):
             self.logger.debug(
                 "Updating Scene Description Loader node '{}' to: {}".format(nodePath, path)
             )
             adamPipe.SceneDescriptionLoaderNode.updateFilePath(node, path)
         
 
-        elif(nodeType == "sceneAnimation::1.0"):
+        elif(nodeType == "sceneAnimation::2.0"):
             self.logger.debug(
                 "Updating Scene Animation Loader node '{}' to: {}".format(nodePath, path)
             )
