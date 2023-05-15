@@ -36,8 +36,8 @@ class MayaCameraMayaPublishPlugin(HookBaseClass):
 
         # Get the number of camera in the camera depedencies.
         cameraShapes = cmds.listRelatives(cameraRoot, allDescendents=True, type="camera", fullPath=True)
-        if( len(cameraShapes) != 1 ):
-            errorMsg = "The group must contain only one camera."
+        if( len(cameraShapes) == 0 ):
+            errorMsg = "The group must contain at least one camera."
             self.logger.error(errorMsg)
             raise Exception(errorMsg)
 

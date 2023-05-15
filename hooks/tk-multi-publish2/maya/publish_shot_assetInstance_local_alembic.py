@@ -81,6 +81,7 @@ class MayaShotAssetInstanceLocalAlembicPublishPlugin(HookBaseClass):
             RIG = mayaObject.groupRig,
             NS = namespace
         )
+        startFrame, endFrame = publihTools.getSceneFrameRange()
 
         # Check if there is at least two keyframe.
         if(not cmds.objExists(localCon)):
@@ -89,12 +90,21 @@ class MayaShotAssetInstanceLocalAlembicPublishPlugin(HookBaseClass):
             raise Exception(errorMsg)
 
 
+
+        # Get the path to create and publish.
+        publish_path = item.properties["path"]
+
+        # Ensure the publish folder exists:
+        publish_folder = os.path.dirname(publish_path)
+        self.parent.ensure_folder_exists(publish_folder)
         # Publish the alembic.
-        publihTools.hookPublishAlembicAnimationPublish(
-            self,
-            settings,
-            item,
-            useFrameRange = False
+        publihTools.exportAlembic(
+            localCon,
+            startFrame,
+            startFrame,
+            publish_path,
+            exportABCVersion = 1,
+            spaceType = "world"
         )
 
         # let the base class register the publish
