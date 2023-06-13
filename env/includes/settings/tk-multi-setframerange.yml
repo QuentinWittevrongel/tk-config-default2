@@ -30,3 +30,9 @@ settings.tk-multi-setframerange.maya:
 settings.tk-multi-setframerange.houdini:
   hook_frame_operation: "{config}/tk-multi-setframerange/houdini/P3D_houdini_actions.py"
   location: "@apps.tk-multi-setframerange.location"
+
+
+# Nuke
+settings.tk-multi-setframerange.nuke:
+  hook_frame_operation: "{config}/tk-multi-setframerange/nuke/P3D_nuke_actions.py"
+  location: "@apps.tk-multi-setframerange.location"

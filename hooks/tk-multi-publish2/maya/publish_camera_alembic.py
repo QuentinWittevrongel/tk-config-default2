@@ -42,12 +42,13 @@ class MayaCameraAlembicPublishPlugin(HookBaseClass):
             raise Exception(errorMsg)
 
         # Get the parent of the camera shape.
-        cameraParent = cmds.listRelatives(cameraShapes[0], parent=True, fullPath=True)[0]
-        # Check if the frameRange attribute exists.
-        if(not cmds.attributeQuery("frameRange", node=cameraParent, exists=True)):
-            errorMsg = "The camera {} does not have a frameRange attribute.".format(cameraParent)
-            self.logger.error(errorMsg)
-            raise Exception(errorMsg)
+        cameraParents = cmds.listRelatives(cameraShapes, parent=True, fullPath=True)
+        for cameraParent in cameraParents:
+            # Check if the frameRange attribute exists.
+            if(not cmds.attributeQuery("frameRange", node=cameraParent, exists=True)):
+                errorMsg = "The camera {} does not have a frameRange attribute.".format(cameraParent)
+                self.logger.error(errorMsg)
+                raise Exception(errorMsg)
 
         # Get the sequence qnd shot name from the camera root name.
         cameraRootShort     = cameraRoot.split("|")[-1].split(":")[-1]
@@ -73,10 +74,10 @@ class MayaCameraAlembicPublishPlugin(HookBaseClass):
         # Get the root of the camera.
         cameraRoot = item.parent.properties.get("cameraRoot")
 
-        # Get the camera shape.
-        cameraShape = cmds.listRelatives(cameraRoot, allDescendents=True, type="camera", fullPath=True)[0]
+        # Get the camera shapes.
+        cameraShapes = cmds.listRelatives(cameraRoot, allDescendents=True, type="camera", fullPath=True)
         # Get the parent of the camera shape.
-        cameraParent = cmds.listRelatives(cameraShape, parent=True, fullPath=True)[0]
+        cameraParents = cmds.listRelatives(cameraShapes, parent=True, fullPath=True)
 
         # Get the path.
         publish_path = item.properties.get("path")
@@ -86,13 +87,15 @@ class MayaCameraAlembicPublishPlugin(HookBaseClass):
         self.parent.ensure_folder_exists(publish_folder)
 
         # Get the framerange attribute of the camera.
-        frameRange = cmds.getAttr(cameraParent + ".frameRange")
+        maxFrameRange = 0
+        for cameraParent in cameraParents:
+            maxFrameRange = max(maxFrameRange, cmds.getAttr(cameraParent + ".frameRange"))
 
         # Export the alembic.
         publihTools.exportAlembic(
-            [cameraParent],
-            1001,
-            1001 + frameRange - 1,
+            cameraParents,
+            1001 - 24,
+            1001 + maxFrameRange - 1 + 24,
             publish_path,
             exportABCVersion    = 1,
             spaceType           = "world"

@@ -42,7 +42,38 @@ class FrameOperation(HookBaseClass):
             (e.g. the current shot, current asset etc)
 
         """
+        # Get the current engine.
+        currentEngine = sgtk.platform.current_engine()
+        # Get the current context.
+        currentContext = currentEngine.context
+        # Get the context project.
+        ctxtProject = currentContext.project
+        # Get the context step.
+        ctxtStep = currentContext.step
+        # Get the context entity.
+        ctxtEntity = currentContext.entity
+        # Get the context task.
+        ctxtTask = currentContext.task
+        # Get the context user.
+        ctxtUser = currentContext.user
+
+        outerStartFrame = in_frame - 24
+        outerEndFrame   = out_frame + 24
+        innerStartFrame = in_frame
+        innerEndFrame   = out_frame
+
+        if(ctxtEntity["type"] == "Shot" and ctxtStep["name"] == "Lighting"):
+            outerStartFrame = in_frame - 12
+            outerEndFrame = out_frame + 12
+            innerStartFrame = in_frame
+            innerEndFrame = out_frame
+        else:
+            outerStartFrame = in_frame - 24
+            outerEndFrame = out_frame + 24
+            innerStartFrame = in_frame
+            innerEndFrame = out_frame
+
         # Set the outer frame range for the current scene.
-        hou.playbar.setFrameRange(in_frame - 24, out_frame + 24)
+        hou.playbar.setFrameRange(outerStartFrame, outerEndFrame)
         # set frame ranges for plackback.
-        hou.playbar.setPlaybackRange(in_frame, out_frame)
+        hou.playbar.setPlaybackRange(innerStartFrame, innerEndFrame)

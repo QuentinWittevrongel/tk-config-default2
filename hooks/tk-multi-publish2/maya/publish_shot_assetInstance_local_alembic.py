@@ -99,7 +99,7 @@ class MayaShotAssetInstanceLocalAlembicPublishPlugin(HookBaseClass):
         self.parent.ensure_folder_exists(publish_folder)
         # Publish the alembic.
         publihTools.exportAlembic(
-            localCon,
+            [localCon],
             startFrame,
             startFrame,
             publish_path,

@@ -105,7 +105,7 @@ class BeforeAppLaunch(tank.Hook):
         if(software_entity["code"] == "Maya"):
 
             # Add farmTools.
-            self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0")
+            self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\farmTools\\0.6.0")
 
             # Add Studio Library.
             self.addToEnvironmentEnd("PYTHONPATH", "Z:\\P3DTools\\productionPackages\\studiolibrary\\2.9.6.b3\\src")
@@ -131,7 +131,7 @@ class BeforeAppLaunch(tank.Hook):
                     # Add Adam scripts.
                     self.addToEnvironmentEnd("PYTHONPATH", "P:\\shows\\ADAM\\td\\maya\\scripts")
                     # Add Adam rig nodes.
-                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes\\adamRigNodes-0.1.5\\module")
+                    self.addToEnvironmentEnd("MAYA_MODULE_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\adamRigNodes\\adamRigNodes-0.1.6\\module")
                     # Add Alembic 2.0.
                     self.addToEnvironmentEnd("MAYA_PLUG_IN_PATH", "P:\\shows\\ADAM\\td\\productionPackages\\alembic\\2.0\\maya2023\\plug-ins")
                     # Add the picker.
@@ -156,8 +156,8 @@ class BeforeAppLaunch(tank.Hook):
 
         elif(software_entity["code"] == "Nuke"):
             self.addToEnvironmentBegin('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\nukeGizmos')
-            self.addToEnvironmentBegin('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0')
-            self.addToEnvironmentEnd('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.5.0\\farmTools\\dccs\\nuke\\plugins')
+            self.addToEnvironmentBegin('PYTHONPATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.6.0')
+            self.addToEnvironmentEnd('NUKE_PATH', 'Z:\\P3DTools\\productionPackages\\farmTools\\0.6.0\\farmTools\\dccs\\nuke\\plugins')
 
             if(projectName == "KML"):
                 self.addToEnvironmentEnd('NUKE_PATH', 'O:\\shows\\KML\\library\\compositing\\.nuke\\ProductionTools')

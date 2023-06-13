@@ -135,16 +135,23 @@ class BreakdownSceneOperations(HookBaseClass):
             "materialXFilePath"
         ))
 
-        # Asset Deformed Loader nodes both for the geo and the materialX.
+        # Asset Animation Loader nodes both for the geo and the materialX.
         items.extend(self.getNodes(
             hou.objNodeTypeCategory(),
-            "assetAnimationLoader::1.0",
+            "assetAnimationLoader::2.0",
             "geometryFilePath"
         ))
         items.extend(self.getNodes(
             hou.objNodeTypeCategory(),
-            "assetAnimationLoader::1.0",
+            "assetAnimationLoader::2.0",
             "materialXFilePath"
+        ))
+
+        # Get the alembic archives.
+        items.extend(self.getNodes(
+            hou.objNodeTypeCategory(),
+            "alembicarchive",
+            "fileName"
         ))
 
         # Get all the loaded HDA published.
@@ -259,7 +266,7 @@ class BreakdownSceneOperations(HookBaseClass):
                 adamPipe.AssetDeformedLoaderNode.updateMaterialXFilePath(node, path)
         
 
-        elif(nodeType == "assetAnimationLoader::1.0"):
+        elif(nodeType == "assetAnimationLoader::2.0"):
             self.logger.debug(
                 "Updating Asset Animation Loader node '{}' to: {}".format(nodePath, path)
             )
@@ -268,6 +275,13 @@ class BreakdownSceneOperations(HookBaseClass):
             elif(parm == "materialXFilePath"):
                 adamPipe.AssetAnimationLoaderNode.updateMaterialXFilePath(node, path)
 
+        elif(nodeType == "alembicarchive"):
+            self.logger.debug(
+                "Updating Alembic Archive node '{}' to: {}".format(nodePath, path)
+            )
+            node.parm(parm).set(path)
+            # Press the button to update the hierarchy.
+            node.parm("buildHierarchy").pressButton()
 
         # if(node_type == "alembic"):
         #     alembic_node = hou.node(node_name)
