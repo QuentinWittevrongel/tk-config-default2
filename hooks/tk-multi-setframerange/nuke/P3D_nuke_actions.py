@@ -49,8 +49,8 @@ class FrameOperation(HookBaseClass):
         if locked:
             nuke.root()["lock_range"].setValue(False)
         # set values
-        nuke.root()["first_frame"].setValue(in_frame - 12)
-        nuke.root()["last_frame"].setValue(out_frame + 12)
+        nuke.root()["first_frame"].setValue(in_frame)
+        nuke.root()["last_frame"].setValue(out_frame)
         # and lock again
         if locked:
             nuke.root()["lock_range"].setValue(True)

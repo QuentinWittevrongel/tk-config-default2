@@ -938,8 +938,8 @@ class MayaSessionCollector(HookBaseClass):
         # Create an item to act has a parent for the animated assets.
         mainItem = parent_item.create_item(
             "maya.shot.environmentAnimated",
-            "Animated Assets",
-            "Animated Assets"
+            "Animated Instances",
+            "Animated Instances"
         )
         # Add the animated assets to the item properties.
         mainItem.properties["animatedAssets"] = animatedAssets
@@ -971,7 +971,7 @@ class MayaSessionCollector(HookBaseClass):
         mainItem = parent_item.create_item(
             "maya.shot.environmentDeformed",
             "Deformed Asset",
-            deformedAsset.fullname.split('|')[-1].split(':')[0]
+            deformedAsset.fullname.split('|')[-1].split(':')[-2]
         )
         # Add the deformed asset to the item properties.
         mainItem.properties["mayaObject"] = deformedAsset
@@ -981,7 +981,7 @@ class MayaSessionCollector(HookBaseClass):
             mainItem,
             'maya.shot.environmentDeformed.abc',
             'Alembic',
-            deformedAsset.fullname.split('|')[-1].split(':')[0]
+            deformedAsset.fullname.split('|')[-1].split(':')[-2]
         )
 
         return mainItem
@@ -1030,20 +1030,19 @@ class MayaSessionCollector(HookBaseClass):
                 assetField = fields.get('Asset')
                 # Create special publish for Yuri.
                 if(assetField == "yuri"):
-                    # Create the item ui for the spline alembic export.
-                    self.create_item(
-                        mainItem,
-                        'maya.shot.assetInstance.spline.abc',
-                        'Alembic Spline',
-                        mayaObject.fullname.split('|')[-1].split(':')[0],
-                        'alembic.png'
-                    )
-
                     # Create the item ui for the local alembic export.
                     self.create_item(
                         mainItem,
                         'maya.shot.assetInstance.local.abc',
                         'Alembic Local',
+                        mayaObject.fullname.split('|')[-1].split(':')[0],
+                        'alembic.png'
+                    )
+                    # Create the item ui for the spline alembic export.
+                    self.create_item(
+                        mainItem,
+                        'maya.shot.assetInstance.spline.abc',
+                        'Alembic Spline',
                         mayaObject.fullname.split('|')[-1].split(':')[0],
                         'alembic.png'
                     )
